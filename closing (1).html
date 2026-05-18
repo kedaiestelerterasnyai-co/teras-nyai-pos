@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0a">
+<title>Tutup Shift — Teras Nyai</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--bg1:#111;--bg2:#1a1a1a;--bg3:#222;--bg4:#2a2a2a;--b:#2a2a2a;--b2:#333;--tx:#f0ece4;--tx2:#888;--tx3:#555;--am:#f59e0b;--am2:#d97706;--amd:rgba(245,158,11,.12);--gn:#10b981;--gnd:rgba(16,185,129,.12);--rd:#ef4444;--rdd:rgba(239,68,68,.12);--bl:#3b82f6;--bld:rgba(59,130,246,.12);--r:12px;--rsm:8px;--font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--tx);font-family:var(--font);min-height:100dvh}
+button{cursor:pointer;font-family:var(--font);touch-action:manipulation}
+input,select,textarea{font-family:var(--font)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* LAYOUT */
+.app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+.topbar{background:var(--bg1);border-bottom:1px solid var(--b);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;flex-shrink:0}
+.topbar-back{background:none;border:none;color:var(--tx2);font-size:20px;padding:4px;border-radius:6px;display:flex;align-items:center}
+.topbar-back:active{color:var(--am)}
+.topbar-title{font-size:14px;font-weight:700;flex:1}
+.topbar-sub{font-size:11px;color:var(--tx2);font-family:var(--mono)}
+
+/* STEP NAV */
+.steps{display:flex;overflow-x:auto;gap:0;padding:0;background:var(--bg1);border-bottom:1px solid var(--b);flex-shrink:0;scrollbar-width:none}
+.steps::-webkit-scrollbar{display:none}
+.step-tab{flex-shrink:0;padding:10px 14px;font-size:11px;font-weight:600;font-family:var(--mono);color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s;display:flex;align-items:center;gap:5px}
+.step-tab.active{color:var(--am);border-bottom-color:var(--am)}
+.step-tab.done{color:var(--gn)}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--b2);flex-shrink:0}
+.step-tab.active .step-dot{background:var(--am)}
+.step-tab.done .step-dot{background:var(--gn)}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:14px;padding-bottom:90px;-webkit-overflow-scrolling:touch}
+
+/* SECTION */
+.section-label{font-size:10px;font-weight:700;color:var(--am);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);padding:14px 0 8px;border-bottom:1px solid var(--b);margin-bottom:12px}
+.section-label:first-child{padding-top:0}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.card-head{padding:11px 13px;border-bottom:1px solid var(--b);font-size:11px;font-weight:700;color:var(--am);letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono)}
+.card-body{padding:13px}
+
+/* FORMS */
+.form-group{margin-bottom:13px}
+.form-group:last-child{margin-bottom:0}
+.form-label{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:5px;display:block}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg3);border:1.5px solid var(--b2);border-radius:var(--rsm);color:var(--tx);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--am)}
+.form-textarea{resize:vertical;min-height:72px}
+.form-input[type="number"]{font-family:var(--mono)}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-select option{background:var(--bg3)}
+
+/* STOCK INPUT ROW */
+.stock-row{display:flex;align-items:center;gap:10px;padding:9px 13px;border-bottom:1px solid var(--b)}
+.stock-row:last-child{border-bottom:none}
+.stock-name{flex:1;font-size:13px;font-weight:500}
+.stock-unit{font-size:11px;color:var(--tx3);font-family:var(--mono);margin-top:2px}
+.stock-input{width:80px;background:var(--bg3);border:1.5px solid var(--b2);border-radius:var(--rsm);color:var(--tx);font-family:var(--mono);font-size:14px;padding:7px 10px;text-align:center;outline:none;transition:border-color .2s;flex-shrink:0}
+.stock-input:focus{border-color:var(--am)}
+
+/* CHECKLIST */
+.check-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .1s}
+.check-item:last-child{border-bottom:none}
+.check-item:active{background:var(--bg3)}
+.check-box{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--bg3)}
+.check-box.checked{background:var(--gnd);border-color:var(--gn)}
+.check-tick{font-size:13px;color:var(--gn);display:none}
+.check-box.checked .check-tick{display:block}
+.check-label{font-size:13px;line-height:1.4}
+.check-label.checked{color:var(--tx2);text-decoration:line-through}
+
+/* SUMMARY BOX */
+.summary-box{background:var(--bg3);border:1.5px solid var(--b2);border-radius:var(--r);padding:13px;margin-bottom:10px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px}
+.summary-row .l{color:var(--tx2)}
+.summary-row .v{font-family:var(--mono);font-weight:600}
+.summary-grand{border-top:1.5px solid var(--b2);margin-top:8px;padding-top:10px;font-size:16px;font-weight:700;color:var(--am)}
+
+/* REKAP KOTAK */
+.rekap-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.rekap-box{background:var(--bg3);border:1.5px solid var(--b2);border-radius:var(--rsm);padding:11px 12px}
+.rekap-label{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:5px}
+.rekap-val{font-family:var(--mono);font-size:16px;font-weight:700}
+
+/* BUTTONS */
+.btn{border:none;border-radius:var(--rsm);font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;cursor:pointer;touch-action:manipulation}
+.btn-sm{padding:8px 14px;font-size:12px}
+.btn-lg{padding:14px 18px;font-size:15px;font-weight:700}
+.btn-full{width:100%}
+.btn-amber{background:var(--am);color:#000}.btn-amber:active{background:var(--am2)}
+.btn-ghost{background:var(--bg3);border:1.5px solid var(--b2);color:var(--tx2)}.btn-ghost:active{border-color:var(--am);color:var(--am)}
+.btn-success{background:var(--gnd);border:1.5px solid var(--gn);color:var(--gn)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* BOTTOM BAR */
+.bottom-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg1);border-top:1px solid var(--b);padding:11px 14px;display:flex;gap:10px;z-index:40}
+
+/* PROGRESS */
+.progress-wrap{background:var(--b);border-radius:4px;height:4px;margin-bottom:14px;overflow:hidden}
+.progress-bar{height:100%;background:var(--am);border-radius:4px;transition:width .3s}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;font-family:var(--mono)}
+.badge-amber{background:var(--amd);color:var(--am)}
+.badge-green{background:var(--gnd);color:var(--gn)}
+.badge-red{background:var(--rdd);color:var(--rd)}
+
+/* TOAST */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--bg3);border:1.5px solid var(--b2);border-radius:var(--rsm);padding:10px 16px;font-size:13px;font-family:var(--mono);opacity:0;transition:all .25s;z-index:100;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:var(--gn);color:var(--gn)}
+#toast.err{border-color:var(--rd);color:var(--rd)}
+
+/* SUCCESS SCREEN */
+.success-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60dvh;text-align:center;padding:24px}
+.success-icon{font-size:56px;margin-bottom:16px}
+.success-title{font-size:20px;font-weight:700;margin-bottom:8px;color:var(--gn)}
+.success-sub{font-size:13px;color:var(--tx2);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <button class="topbar-back" onclick="history.back()">←</button>
+    <div style="flex:1">
+      <div class="topbar-title">Tutup Shift</div>
+      <div class="topbar-sub" id="tb-info">Teras Nyai POS</div>
+    </div>
+    <span class="badge badge-amber" id="tb-step">1/5</span>
+  </div>
+
+  <!-- STEP TABS -->
+  <div class="steps">
+    <button class="step-tab active" data-step="0" onclick="goStep(0)"><span class="step-dot"></span>SOP</button>
+    <button class="step-tab" data-step="1" onclick="goStep(1)"><span class="step-dot"></span>Sales</button>
+    <button class="step-tab" data-step="2" onclick="goStep(2)"><span class="step-dot"></span>Bahan</button>
+    <button class="step-tab" data-step="3" onclick="goStep(3)"><span class="step-dot"></span>Kemasan</button>
+    <button class="step-tab" data-step="4" onclick="goStep(4)"><span class="step-dot"></span>Ringkasan</button>
+  </div>
+
+  <div class="content" id="main-content">
+    <!-- Dirender oleh JS -->
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn btn-ghost btn-sm" id="btn-prev" onclick="prevStep()" style="display:none">← Kembali</button>
+    <button class="btn btn-amber btn-lg btn-full" id="btn-next" onclick="nextStep()">Lanjut →</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────
+var SUPA_URL = 'https://xaixkcaeufxesqmdzhuv.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhaXhrY2FldWZ4ZXNxbWR6aHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5Njc1NzUsImV4cCI6MjA5NDU0MzU3NX0.nrFYxWfn8kA1JV6wyiW1X6KVRxKJi6yBnMPAGVIPTjY';
+
+// ── STATE ─────────────────────────────────────────────────────
+var currentStep = 0;
+var totalSteps  = 5;
+
+// Ambil session dari localStorage (set oleh POS utama)
+var session = JSON.parse(localStorage.getItem('pos_session') || 'null');
+// Fallback jika dibuka standalone
+if (!session) {
+  session = { user: { id:'EMP-001', nama:'Kasir', jabatan:'Kasir' }, outletId:'OTL-A', outletNama:'Kedai Mencong' };
+}
+
+var data = {
+  // Step 0: SOP Closing
+  sop: {
+    cek_closing: {},
+    kebersihan: {},
+    berita_acara: ''
+  },
+  // Step 1: Report Sales
+  sales: {
+    modal: '', pengeluaran_tunai: '',
+    omset_kedai: '', qris: '', shopee: '', gofood: '', grabfood: '', qpon: '', uang_fisik: '',
+    berita_acara: ''
+  },
+  // Step 2: Stock Bahan
+  bahan: {},
+  // Step 3: Stock Kemasan
+  kemasan: {}
+};
+
+// ── DATA DEFINISI ─────────────────────────────────────────────
+var CEK_CLOSING = [
+  'Rolling Door tertutup dengan Benar dan digembok',
+  'Nyalakan Listrik Malam',
+  'Freezer Menyala',
+  'Showcase Menyala',
+  'Mesin Cup Sealer Off',
+  'Mesin Kasir Off',
+  'Laporan Sales',
+  'Stockan Bahan',
+  'Stockan Kemasan',
+  'Cek Kondisi Gas dan Kompor Mati dan Copot dari selangnya',
+  'Cek Kondisi Kompor Listrik Cabut Colokannya',
+  'Cek Kondisi Kipas Angin, AC dalam keadaan OFF',
+  'Perlengkapan dan Peralatan kebersihan di dalam',
+  'Hp Kasir dalam keadaan Off atau Airplane Mode',
+  'Laporan ke Grup WA, jika ada hal yang perlu perbaikan'
+];
+
+var KEBERSIHAN_CLOSING = [
+  'Mixer Bersih', 'Kompor Bersih', 'Meja masak bersih',
+  'Alat masak dan makan bersih', 'Sink Cucian Piring Bersih',
+  'Teras Bagian Depan Bersih (Sapu dan pel)',
+  'Area Sitting Customer (Sapu dan pel)',
+  'Meja Customer dan Kursi', 'Meja Kasir',
+  'Peralatan di atas meja Kasir dan Bar',
+  'Perlengkapan di atas meja Kasir dan Bar'
+];
+
+var BAHAN_ITEMS = [
+  // BAHAN ADONAN
+  { kat:'BAHAN ADONAN', nama:'Adonan Mentah Masuk', sat:'porsi' },
+  { kat:'BAHAN ADONAN', nama:'Sisa Adonan Mentah', sat:'porsi' },
+  // JELLY DKK
+  { kat:'JELLY DKK (gram)', nama:'Sagu Mutiara', sat:'gr' },
+  { kat:'JELLY DKK (gram)', nama:'Jelly Hijau', sat:'gr' },
+  { kat:'JELLY DKK (gram)', nama:'Jelly Cincau', sat:'gr' },
+  { kat:'JELLY DKK (gram)', nama:'Jelly Kelapa', sat:'gr' },
+  { kat:'JELLY DKK (gram)', nama:'Selasih Mateng', sat:'gr' },
+  { kat:'JELLY DKK (gram)', nama:'Selasih Mentah', sat:'gr' },
+  // BUAH-BUAHAN
+  { kat:'BUAH-BUAHAN (gram)', nama:'Nangka', sat:'gr' },
+  { kat:'BUAH-BUAHAN (gram)', nama:'Alpukat', sat:'gr' },
+  { kat:'BUAH-BUAHAN (gram)', nama:'Mangga', sat:'gr' },
+  { kat:'BUAH-BUAHAN (gram)', nama:'Durian', sat:'gr' },
+  // BAKSO
+  { kat:'BAKSO & PELENGKAP', nama:'Bakso', sat:'porsi' },
+  { kat:'BAKSO & PELENGKAP', nama:'Kwetiau', sat:'gr' },
+  { kat:'BAKSO & PELENGKAP', nama:'Sambel', sat:'gr' },
+  { kat:'BAKSO & PELENGKAP', nama:'Garam', sat:'gr' },
+  { kat:'BAKSO & PELENGKAP', nama:'Penyedap Rasa', sat:'gr' },
+  // BANGLADESH
+  { kat:'BANGLADESH', nama:'Bumbu Bangladesh', sat:'pcs' },
+  { kat:'BANGLADESH', nama:'Indomie Goreng', sat:'pcs' },
+  { kat:'BANGLADESH', nama:'Telur PNS', sat:'butir' },
+  { kat:'BANGLADESH', nama:'Telur Omega', sat:'butir' },
+  { kat:'BANGLADESH', nama:'Bawang Goreng', sat:'gr' },
+  { kat:'BANGLADESH', nama:'Nori', sat:'lbr' },
+  { kat:'BANGLADESH', nama:'Sawi', sat:'gr' },
+  { kat:'BANGLADESH', nama:'Saos', sat:'gr' },
+  { kat:'BANGLADESH', nama:'Totole', sat:'gr' },
+  { kat:'BANGLADESH', nama:'Keju', sat:'gr' },
+  { kat:'BANGLADESH', nama:'Sosis', sat:'pcs' },
+  // BUBUK PURE
+  { kat:'BUBUK PURE', nama:'Matcha', sat:'gr' },
+  { kat:'BUBUK PURE', nama:'Coklat', sat:'gr' },
+  { kat:'BUBUK PURE', nama:'Taro', sat:'gr' },
+  { kat:'BUBUK PURE', nama:'Strawberry', sat:'gr' },
+  { kat:'BUBUK PURE', nama:'Kopi', sat:'gr' },
+  // MATCHA SERIES
+  { kat:'MATCHA SERIES', nama:'Hydro Coco', sat:'botol' },
+  { kat:'MATCHA SERIES', nama:'Madu (Sachet)', sat:'sachet' },
+  { kat:'MATCHA SERIES', nama:'Lemon', sat:'buah' }
+];
+
+var KEMASAN_ITEMS = [
+  { nama:'Cup Medium', sat:'pcs' },
+  { nama:'Cup Jumbo', sat:'pcs' },
+  { nama:'Sedotan Boba', sat:'pcs' },
+  { nama:'Sedotan Kecil', sat:'pcs' },
+  { nama:'Paper Bowl & Tutup', sat:'pcs' },
+  { nama:'Paper Lunch', sat:'pcs' },
+  { nama:'Sumpit', sat:'pcs' },
+  { nama:'Sendok', sat:'pcs' },
+  { nama:'Kertas Thermal', sat:'lembar' },
+  { nama:'Plastik 24', sat:'pcs' },
+  { nama:'Plastik Satuan', sat:'pcs' },
+  { nama:'Plastik Cup Seal', sat:'pcs' },
+  { nama:'Tutup Cup Cembung', sat:'pcs' },
+  { nama:'Solasi Kecil', sat:'pcs' },
+  { nama:'Tissue', sat:'pcs' },
+  { nama:'Trash Bag', sat:'pcs' }
+];
+
+// ── STEP RENDERER ─────────────────────────────────────────────
+function render() {
+  var c = document.getElementById('main-content');
+  document.getElementById('tb-info').textContent = session.user.nama + ' · ' + session.outletNama;
+  document.getElementById('tb-step').textContent = (currentStep+1) + '/' + totalSteps;
+
+  // Update step tabs
+  document.querySelectorAll('.step-tab').forEach(function(t) {
+    var s = parseInt(t.dataset.step);
+    t.classList.remove('active','done');
+    if (s === currentStep) t.classList.add('active');
+    else if (s < currentStep) t.classList.add('done');
+  });
+
+  // Bottom bar
+  document.getElementById('btn-prev').style.display = currentStep > 0 ? '' : 'none';
+  var nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = currentStep === totalSteps-1 ? '✓ Kirim Semua Laporan' : 'Lanjut →';
+  nextBtn.className = 'btn btn-lg btn-full ' + (currentStep === totalSteps-1 ? 'btn-success' : 'btn-amber');
+
+  // Render step
+  if (currentStep === 0) c.innerHTML = renderSOP();
+  else if (currentStep === 1) c.innerHTML = renderSales();
+  else if (currentStep === 2) c.innerHTML = renderBahan();
+  else if (currentStep === 3) c.innerHTML = renderKemasan();
+  else if (currentStep === 4) c.innerHTML = renderRingkasan();
+
+  c.scrollTop = 0;
+  attachListeners();
+}
+
+// ── STEP 0: SOP CLOSING ───────────────────────────────────────
+function renderSOP() {
+  var html = '<div class="progress-wrap"><div class="progress-bar" style="width:20%"></div></div>';
+  html += '<div class="section-label">Cek Closingan</div>';
+  html += '<div class="card"><div class="card-body" style="padding:0">';
+  CEK_CLOSING.forEach(function(item) {
+    var checked = data.sop.cek_closing[item] || false;
+    html += '<div class="check-item" onclick="toggleCheck(\'cek_closing\',\'' + escKey(item) + '\')">' +
+      '<div class="check-box' + (checked?' checked':'') + '"><span class="check-tick">✓</span></div>' +
+      '<div class="check-label' + (checked?' checked':'') + '">' + item + '</div></div>';
+  });
+  html += '</div></div>';
+
+  html += '<div class="section-label">Kondisi Kebersihan</div>';
+  html += '<div class="card"><div class="card-body" style="padding:0">';
+  KEBERSIHAN_CLOSING.forEach(function(item) {
+    var checked = data.sop.kebersihan[item] || false;
+    html += '<div class="check-item" onclick="toggleCheck(\'kebersihan\',\'' + escKey(item) + '\')">' +
+      '<div class="check-box' + (checked?' checked':'') + '"><span class="check-tick">✓</span></div>' +
+      '<div class="check-label' + (checked?' checked':'') + '">' + item + '</div></div>';
+  });
+  html += '</div></div>';
+
+  html += '<div class="section-label">Berita Acara</div>';
+  html += '<div class="card"><div class="card-body">' +
+    '<textarea class="form-textarea" id="sop_berita" placeholder="Catatan kondisi kedai, hal yang perlu dilaporkan...">' +
+    (data.sop.berita_acara||'') + '</textarea></div></div>';
+
+  var sopDone = Object.keys(data.sop.cek_closing).length;
+  var kbrDone = Object.keys(data.sop.kebersihan).length;
+  html += '<div style="text-align:center;font-size:12px;color:var(--tx2);font-family:var(--mono);padding:8px 0">' +
+    'SOP: ' + sopDone + '/' + CEK_CLOSING.length + ' · Kebersihan: ' + kbrDone + '/' + KEBERSIHAN_CLOSING.length + '</div>';
+  return html;
+}
+
+function toggleCheck(type, key) {
+  var realKey = unescKey(key);
+  if (type === 'cek_closing') data.sop.cek_closing[realKey] = !data.sop.cek_closing[realKey];
+  else if (type === 'kebersihan') data.sop.kebersihan[realKey] = !data.sop.kebersihan[realKey];
+  var el = event.currentTarget;
+  var box = el.querySelector('.check-box');
+  var lbl = el.querySelector('.check-label');
+  var now = type === 'cek_closing' ? data.sop.cek_closing[realKey] : data.sop.kebersihan[realKey];
+  box.classList.toggle('checked', now);
+  lbl.classList.toggle('checked', now);
+  el.querySelector('.check-tick').style.display = now ? 'block' : 'none';
+  // Update counter
+  var sopDone = Object.values(data.sop.cek_closing).filter(Boolean).length;
+  var kbrDone = Object.values(data.sop.kebersihan).filter(Boolean).length;
+  var counter = document.querySelector('[style*="text-align:center"]');
+  if (counter) counter.textContent = 'SOP: ' + sopDone + '/' + CEK_CLOSING.length + ' · Kebersihan: ' + kbrDone + '/' + KEBERSIHAN_CLOSING.length;
+}
+function escKey(s) { return s.replace(/'/g,"\\'").replace(/\n/g,''); }
+function unescKey(s) { return s; }
+
+// ── STEP 1: REPORT SALES ──────────────────────────────────────
+function renderSales() {
+  var html = '<div class="progress-wrap"><div class="progress-bar" style="width:40%"></div></div>';
+
+  // Auto-fill dari POS session
+  var posTotal = parseInt(localStorage.getItem('pos_shift_total') || '0');
+  var posQris  = parseInt(localStorage.getItem('pos_shift_qris') || '0');
+
+  html += '<div class="section-label">Modal & Pengeluaran</div>';
+  html += '<div class="card"><div class="card-body">';
+  html += formNum('Modal Awal (Rp)', 'sales_modal', data.sales.modal);
+  html += formNum('Total Pengeluaran Tunai (Rp)', 'sales_pengeluaran', data.sales.pengeluaran_tunai);
+  html += '</div></div>';
+
+  html += '<div class="section-label">Rincian Omset</div>';
+  html += '<div class="card"><div class="card-body">';
+  html += formNum('Total Omset Penjualan di Kedai (Rp)', 'sales_omset', data.sales.omset_kedai || (posTotal > 0 ? posTotal : ''));
+  html += '</div></div>';
+
+  html += '<div class="card"><div class="card-head">Breakdown Pembayaran</div><div class="card-body">';
+  html += '<div class="form-row-2">';
+  html += formNum('QRIS (Rp)', 'sales_qris', data.sales.qris || (posQris > 0 ? posQris : ''));
+  html += formNum('Shopee (Rp)', 'sales_shopee', data.sales.shopee);
+  html += '</div><div class="form-row-2">';
+  html += formNum('GoFood (Rp)', 'sales_gofood', data.sales.gofood);
+  html += formNum('GrabFood (Rp)', 'sales_grabfood', data.sales.grabfood);
+  html += '</div><div class="form-row-2">';
+  html += formNum('QPON (Rp)', 'sales_qpon', data.sales.qpon);
+  html += formNum('Uang Fisik di Laci (Rp)', 'sales_fisik', data.sales.uang_fisik);
+  html += '</div></div></div>';
+
+  html += '<div class="section-label">Berita Acara</div>';
+  html += '<div class="card"><div class="card-body">' +
+    '<textarea class="form-textarea" id="sales_berita" placeholder="Catatan khusus penjualan hari ini...">' +
+    (data.sales.berita_acara||'') + '</textarea></div></div>';
+
+  // Rekap otomatis
+  var total_terima = (parseInt(data.sales.omset_kedai)||0);
+  var sisa_kas = total_terima - (parseInt(data.sales.pengeluaran_tunai)||0);
+  html += '<div class="summary-box">' +
+    '<div class="summary-row"><span class="l">Modal Awal</span><span class="v">' + fmt(data.sales.modal||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">Total Omset</span><span class="v" style="color:var(--am)">' + fmt(data.sales.omset_kedai||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">Pengeluaran Tunai</span><span class="v" style="color:var(--rd)">- ' + fmt(data.sales.pengeluaran_tunai||0) + '</span></div>' +
+    '<div class="summary-row summary-grand"><span>Sisa Kas Harus Ada</span><span>' + fmt(sisa_kas) + '</span></div>' +
+    '</div>';
+  return html;
+}
+
+function formNum(label, id, val) {
+  return '<div class="form-group"><label class="form-label">' + label + '</label>' +
+    '<input type="number" class="form-input" id="' + id + '" placeholder="0" value="' + (val||'') + '" inputmode="numeric"></div>';
+}
+
+// ── STEP 2: STOCK BAHAN ───────────────────────────────────────
+function renderBahan() {
+  var html = '<div class="progress-wrap"><div class="progress-bar" style="width:60%"></div></div>';
+  var lastKat = '';
+  BAHAN_ITEMS.forEach(function(item) {
+    var key = item.nama;
+    var val = data.bahan[key] || '';
+    if (item.kat !== lastKat) {
+      if (lastKat !== '') html += '</div></div>';
+      html += '<div class="section-label">' + item.kat + '</div>';
+      html += '<div class="card"><div class="card-body" style="padding:0">';
+      lastKat = item.kat;
+    }
+    html += '<div class="stock-row">' +
+      '<div><div class="stock-name">' + item.nama + '</div><div class="stock-unit">' + item.sat + '</div></div>' +
+      '<input type="number" class="stock-input" data-key="' + key + '" data-type="bahan" value="' + val + '" placeholder="0" inputmode="numeric">' +
+      '</div>';
+  });
+  if (lastKat !== '') html += '</div></div>';
+
+  var filled = Object.keys(data.bahan).filter(function(k){ return data.bahan[k] !== ''; }).length;
+  html += '<div style="text-align:center;font-size:12px;color:var(--tx2);font-family:var(--mono);padding:8px 0">' +
+    filled + '/' + BAHAN_ITEMS.length + ' item diisi</div>';
+  return html;
+}
+
+// ── STEP 3: STOCK KEMASAN ─────────────────────────────────────
+function renderKemasan() {
+  var html = '<div class="progress-wrap"><div class="progress-bar" style="width:80%"></div></div>';
+  html += '<div class="section-label">Hitung Satuan</div>';
+  html += '<div class="card"><div class="card-body" style="padding:0">';
+  KEMASAN_ITEMS.forEach(function(item) {
+    var key = item.nama;
+    var val = data.kemasan[key] || '';
+    html += '<div class="stock-row">' +
+      '<div><div class="stock-name">' + item.nama + '</div><div class="stock-unit">' + item.sat + '</div></div>' +
+      '<input type="number" class="stock-input" data-key="' + key + '" data-type="kemasan" value="' + val + '" placeholder="0" inputmode="numeric">' +
+      '</div>';
+  });
+  html += '</div></div>';
+
+  var filled = Object.keys(data.kemasan).filter(function(k){ return data.kemasan[k] !== ''; }).length;
+  html += '<div style="text-align:center;font-size:12px;color:var(--tx2);font-family:var(--mono);padding:8px 0">' +
+    filled + '/' + KEMASAN_ITEMS.length + ' item diisi</div>';
+  return html;
+}
+
+// ── STEP 4: RINGKASAN ─────────────────────────────────────────
+function renderRingkasan() {
+  var html = '<div class="progress-wrap"><div class="progress-bar" style="width:100%"></div></div>';
+
+  var sopDone = Object.values(data.sop.cek_closing).filter(Boolean).length;
+  var kbrDone = Object.values(data.sop.kebersihan).filter(Boolean).length;
+  var bahanDone = Object.keys(data.bahan).filter(function(k){ return data.bahan[k] !== ''; }).length;
+  var kemasanDone = Object.keys(data.kemasan).filter(function(k){ return data.kemasan[k] !== ''; }).length;
+
+  html += '<div class="section-label">Ringkasan Laporan</div>';
+  html += '<div class="rekap-grid">' +
+    rekapBox('SOP Closing', sopDone + '/' + CEK_CLOSING.length + ' item', sopDone === CEK_CLOSING.length) +
+    rekapBox('Kebersihan', kbrDone + '/' + KEBERSIHAN_CLOSING.length + ' item', kbrDone === KEBERSIHAN_CLOSING.length) +
+    rekapBox('Stock Bahan', bahanDone + '/' + BAHAN_ITEMS.length + ' item', bahanDone === BAHAN_ITEMS.length) +
+    rekapBox('Stock Kemasan', kemasanDone + '/' + KEMASAN_ITEMS.length + ' item', kemasanDone === KEMASAN_ITEMS.length) +
+    '</div>';
+
+  html += '<div class="section-label">Rekap Sales</div>';
+  html += '<div class="summary-box">' +
+    '<div class="summary-row"><span class="l">Modal Awal</span><span class="v">' + fmt(data.sales.modal||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">Total Omset Kedai</span><span class="v" style="color:var(--am)">' + fmt(data.sales.omset_kedai||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">QRIS</span><span class="v">' + fmt(data.sales.qris||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">Shopee</span><span class="v">' + fmt(data.sales.shopee||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">GoFood</span><span class="v">' + fmt(data.sales.gofood||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">GrabFood</span><span class="v">' + fmt(data.sales.grabfood||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">QPON</span><span class="v">' + fmt(data.sales.qpon||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">Uang Fisik di Laci</span><span class="v">' + fmt(data.sales.uang_fisik||0) + '</span></div>' +
+    '<div class="summary-row"><span class="l">Pengeluaran Tunai</span><span class="v" style="color:var(--rd)">- ' + fmt(data.sales.pengeluaran_tunai||0) + '</span></div>' +
+    '<div class="summary-row summary-grand"><span>Sisa Kas Harus Ada</span><span>' + fmt((parseInt(data.sales.omset_kedai)||0)-(parseInt(data.sales.pengeluaran_tunai)||0)) + '</span></div>' +
+    '</div>';
+
+  html += '<div style="background:var(--gnd);border:1.5px solid var(--gn);border-radius:var(--rsm);padding:12px 14px;font-size:13px;color:var(--gn);margin-top:4px">' +
+    '✓ Semua laporan siap dikirim ke database dan Google Sheets. Pastikan semua data sudah benar sebelum submit.</div>';
+  return html;
+}
+
+function rekapBox(label, val, done) {
+  return '<div class="rekap-box" style="border-color:' + (done?'var(--gn)':'var(--b2)') + '">' +
+    '<div class="rekap-label">' + label + '</div>' +
+    '<div class="rekap-val" style="color:' + (done?'var(--gn)':'var(--am)') + '">' + val + '</div>' +
+    '</div>';
+}
+
+// ── EVENT LISTENERS ───────────────────────────────────────────
+function attachListeners() {
+  // Stock inputs
+  document.querySelectorAll('.stock-input').forEach(function(inp) {
+    inp.addEventListener('change', function() {
+      var type = this.dataset.type;
+      var key  = this.dataset.key;
+      if (type === 'bahan') data.bahan[key] = this.value;
+      else if (type === 'kemasan') data.kemasan[key] = this.value;
+    });
+  });
+  // Sales inputs
+  var salesFields = ['sales_modal','sales_pengeluaran','sales_omset','sales_qris','sales_shopee','sales_gofood','sales_grabfood','sales_qpon','sales_fisik'];
+  var salesKeys   = ['modal','pengeluaran_tunai','omset_kedai','qris','shopee','gofood','grabfood','qpon','uang_fisik'];
+  salesFields.forEach(function(id, i) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function() { data.sales[salesKeys[i]] = this.value; });
+  });
+  // Berita acara
+  var sopBa = document.getElementById('sop_berita');
+  if (sopBa) sopBa.addEventListener('input', function() { data.sop.berita_acara = this.value; });
+  var salesBa = document.getElementById('sales_berita');
+  if (salesBa) salesBa.addEventListener('input', function() { data.sales.berita_acara = this.value; });
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function goStep(s) { saveCurrentStepData(); currentStep = s; render(); }
+function prevStep() { saveCurrentStepData(); if (currentStep > 0) { currentStep--; render(); } }
+function nextStep() {
+  saveCurrentStepData();
+  if (currentStep < totalSteps - 1) { currentStep++; render(); }
+  else submitAll();
+}
+
+function saveCurrentStepData() {
+  // Simpan semua input yang ada di DOM ke state
+  document.querySelectorAll('.stock-input').forEach(function(inp) {
+    if (inp.dataset.type === 'bahan') data.bahan[inp.dataset.key] = inp.value;
+    else if (inp.dataset.type === 'kemasan') data.kemasan[inp.dataset.key] = inp.value;
+  });
+  var salesFields = ['sales_modal','sales_pengeluaran','sales_omset','sales_qris','sales_shopee','sales_gofood','sales_grabfood','sales_qpon','sales_fisik'];
+  var salesKeys   = ['modal','pengeluaran_tunai','omset_kedai','qris','shopee','gofood','grabfood','qpon','uang_fisik'];
+  salesFields.forEach(function(id, i) {
+    var el = document.getElementById(id);
+    if (el) data.sales[salesKeys[i]] = el.value;
+  });
+  var sopBa = document.getElementById('sop_berita');
+  if (sopBa) data.sop.berita_acara = sopBa.value;
+  var salesBa = document.getElementById('sales_berita');
+  if (salesBa) data.sales.berita_acara = salesBa.value;
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────
+async function submitAll() {
+  var btn = document.getElementById('btn-next');
+  btn.disabled = true; btn.textContent = '⏳ Mengirim...';
+
+  var now = new Date();
+  var tgl = now.toISOString().slice(0,10);
+  var ts  = now.toISOString();
+
+  // Payload SOP Closing
+  var sopPayload = {
+    nama_crew     : session.user.nama,
+    kedai         : session.outletNama,
+    outlet_id     : session.outletId,
+    cek_closing   : JSON.stringify(data.sop.cek_closing),
+    kebersihan_area: JSON.stringify(data.sop.kebersihan),
+    berita_acara  : data.sop.berita_acara,
+    submitted_at  : ts,
+    tgl           : tgl
+  };
+
+  // Payload Report Sales
+  var salesPayload = {
+    nama_kasir         : session.user.nama,
+    outlet_id          : session.outletId,
+    kedai              : session.outletNama,
+    tgl                : tgl,
+    modal              : parseInt(data.sales.modal)||0,
+    pengeluaran_tunai  : parseInt(data.sales.pengeluaran_tunai)||0,
+    omset_kedai        : parseInt(data.sales.omset_kedai)||0,
+    qris               : parseInt(data.sales.qris)||0,
+    shopee             : parseInt(data.sales.shopee)||0,
+    gofood             : parseInt(data.sales.gofood)||0,
+    grabfood           : parseInt(data.sales.grabfood)||0,
+    qpon               : parseInt(data.sales.qpon)||0,
+    uang_fisik         : parseInt(data.sales.uang_fisik)||0,
+    berita_acara       : data.sales.berita_acara,
+    submitted_at       : ts
+  };
+
+  // Payload Stock
+  var bahanPayload = {
+    nama_crew  : session.user.nama,
+    outlet_id  : session.outletId,
+    tgl        : tgl,
+    items      : JSON.stringify(data.bahan),
+    submitted_at: ts
+  };
+  var kemasanPayload = {
+    nama_crew  : session.user.nama,
+    outlet_id  : session.outletId,
+    tgl        : tgl,
+    items      : JSON.stringify(data.kemasan),
+    submitted_at: ts
+  };
+
+  var errors = [];
+
+  try {
+    var r1 = await supaInsert('sop_closing', sopPayload);
+    if (!r1) errors.push('SOP Closing');
+  } catch(e) { errors.push('SOP Closing'); }
+
+  try {
+    var r2 = await supaInsert('report_sales', salesPayload);
+    if (!r2) errors.push('Report Sales');
+  } catch(e) { errors.push('Report Sales'); }
+
+  try {
+    var r3 = await supaInsert('report_stock_bahan', bahanPayload);
+    if (!r3) errors.push('Stock Bahan');
+  } catch(e) { errors.push('Stock Bahan'); }
+
+  try {
+    var r4 = await supaInsert('report_stock_kemasan', kemasanPayload);
+    if (!r4) errors.push('Stock Kemasan');
+  } catch(e) { errors.push('Stock Kemasan'); }
+
+  if (errors.length === 0) {
+    showSuccess();
+  } else {
+    toast('Gagal kirim: ' + errors.join(', '), 'err');
+    btn.disabled = false;
+    btn.textContent = '✓ Kirim Semua Laporan';
+  }
+}
+
+async function supaInsert(table, payload) {
+  var res = await fetch(SUPA_URL + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(payload)
+  });
+  return res.ok;
+}
+
+function showSuccess() {
+  document.getElementById('main-content').innerHTML =
+    '<div class="success-screen">' +
+    '<div class="success-icon">✅</div>' +
+    '<div class="success-title">Shift Berhasil Ditutup!</div>' +
+    '<div class="success-sub">Semua laporan sudah terkirim ke database.<br>SOP Closing · Report Sales · Stock Bahan · Stock Kemasan</div>' +
+    '<div style="margin-top:24px;display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px">' +
+    '<button class="btn btn-ghost btn-md btn-full" onclick="location.href=\'index.html\'">← Kembali ke POS</button>' +
+    '</div></div>';
+  document.querySelector('.bottom-bar').style.display = 'none';
+  document.querySelector('.steps').style.display = 'none';
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function fmt(n) { return 'Rp ' + Math.round(n||0).toLocaleString('id-ID'); }
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + (type||'');
+  clearTimeout(t._t); t._t = setTimeout(function(){ t.className = ''; }, 2600);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
