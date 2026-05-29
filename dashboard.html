@@ -8,557 +8,896 @@
 <meta name="theme-color" content="#0a0a0a">
 <title>Dashboard Owner — Teras Nyai</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-:root{--bg:#0a0a0a;--bg1:#111;--bg2:#1a1a1a;--bg3:#222;--b:#2a2a2a;--b2:#333;--tx:#f0ece4;--tx2:#888;--tx3:#444;--am:#f59e0b;--am2:#d97706;--amd:rgba(245,158,11,.12);--gn:#10b981;--gnd:rgba(16,185,129,.12);--rd:#ef4444;--rdd:rgba(239,68,68,.1);--bl:#3b82f6;--bld:rgba(59,130,246,.12);--font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace}
+:root{--bg:#0a0a0a;--bg1:#111;--bg2:#1a1a1a;--bg3:#222;--b:#2a2a2a;--b2:#333;--tx:#f0ece4;--tx2:#888;--tx3:#444;--am:#f59e0b;--am2:#d97706;--amd:rgba(245,158,11,.12);--gn:#10b981;--gnd:rgba(16,185,129,.12);--rd:#ef4444;--rdd:rgba(239,68,68,.1);--bl:#3b82f6;--bld:rgba(59,130,246,.12);--pu:#8b5cf6;--pud:rgba(139,92,246,.12);--font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--tx);font-family:var(--font);min-height:100dvh}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
-.topbar{background:var(--bg1);border-bottom:1px solid var(--b);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-shrink:0}
-.brand{font-size:16px;font-weight:800;color:var(--am)}
-.brand span{color:var(--tx);font-weight:300}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--gn);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.btn-sm{background:var(--bg3);border:1px solid var(--b2);border-radius:8px;color:var(--tx2);font-size:11px;padding:6px 10px;cursor:pointer;font-family:var(--font);transition:all .15s}
-.btn-sm:active{border-color:var(--am);color:var(--am)}
-.btn-danger{border-color:var(--rd);color:var(--rd)}
 
-/* PERIOD TABS */
-.period-wrap{overflow-x:auto;display:flex;gap:6px;padding:10px 14px;background:var(--bg1);border-bottom:1px solid var(--b);scrollbar-width:none;flex-shrink:0}
-.period-wrap::-webkit-scrollbar{display:none}
-.period-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:var(--mono);cursor:pointer;border:1.5px solid var(--b2);color:var(--tx2);white-space:nowrap;transition:all .15s;background:none}
-.period-tab.active{background:var(--amd);border-color:var(--am);color:var(--am)}
+/* TOPBAR */
+.topbar{background:var(--bg1);border-bottom:1px solid var(--b);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:60}
+.brand{font-size:15px;font-weight:800;color:var(--am)}
+.brand span{color:var(--tx);font-weight:300}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--gn);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tbtn{background:var(--bg3);border:1px solid var(--b2);border-radius:7px;color:var(--tx2);font-size:11px;padding:5px 10px;cursor:pointer;font-family:var(--font);transition:all .15s}
+.tbtn:active{border-color:var(--am);color:var(--am)}
+.tbtn.danger{color:var(--rd)}
+
+/* MAIN NAV */
+.main-nav{display:flex;gap:0;background:var(--bg1);border-bottom:1px solid var(--b);overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.main-nav::-webkit-scrollbar{display:none}
+.nav-tab{flex-shrink:0;padding:10px 16px;font-size:12px;font-weight:600;color:var(--tx3);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s;font-family:var(--font)}
+.nav-tab.active{color:var(--am);border-bottom-color:var(--am)}
+
+/* PERIOD */
+.period-bar{display:flex;gap:5px;padding:8px 12px;overflow-x:auto;scrollbar-width:none;background:var(--bg);border-bottom:1px solid var(--b);flex-shrink:0}
+.period-bar::-webkit-scrollbar{display:none}
+.ptab{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;font-family:var(--mono);cursor:pointer;border:1.5px solid var(--b2);color:var(--tx3);background:none;transition:all .15s}
+.ptab.active{background:var(--amd);border-color:var(--am);color:var(--am)}
 
 /* CONTENT */
-.content{padding:12px 14px;max-width:520px;margin:0 auto;padding-bottom:32px}
+.page{padding:12px 14px;max-width:520px;margin:0 auto;padding-bottom:32px;display:none}
+.page.active{display:block}
 
-/* SUMMARY CARDS */
-.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.sum-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:13px}
-.sum-card.full{grid-column:1/-1}
-.sum-label{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:5px}
-.sum-val{font-size:22px;font-weight:700;font-family:var(--mono);line-height:1.1}
-.sum-sub{font-size:11px;color:var(--tx2);margin-top:4px;display:flex;align-items:center;gap:4px}
-.delta{font-size:10px;font-weight:600;font-family:var(--mono);padding:2px 6px;border-radius:6px}
-.delta.up{background:var(--gnd);color:var(--gn)}
-.delta.down{background:var(--rdd);color:var(--rd)}
-.delta.flat{background:var(--bg3);color:var(--tx3)}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.card-head{padding:11px 13px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:11px;font-weight:700;color:var(--am);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)}
+.card-body{padding:13px}
+
+/* SUMMARY GRID */
+.sum2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.sum4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px}
+.scard{background:var(--bg2);border:1px solid var(--b);border-radius:11px;padding:12px}
+.scard.full{grid-column:1/-1}
+.slabel{font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:4px}
+.sval{font-size:20px;font-weight:700;font-family:var(--mono);line-height:1.1}
+.ssub{font-size:10px;color:var(--tx2);margin-top:3px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.delta{font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 5px;border-radius:5px}
+.dup{background:var(--gnd);color:var(--gn)}
+.ddown{background:var(--rdd);color:var(--rd)}
+.dflat{background:var(--bg3);color:var(--tx3)}
 
 /* CHART */
-.chart-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:13px;margin-bottom:14px}
-.chart-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.chart-legend{display:flex;gap:12px}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--tx2);font-family:var(--mono)}
-.legend-dot{width:8px;height:8px;border-radius:50%}
-.chart-wrap{position:relative;height:160px}
-canvas{width:100%!important;height:160px!important}
+.chart-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:13px;margin-bottom:12px}
+.chart-label{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.chart-legend{display:flex;gap:10px}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--tx2);font-family:var(--mono)}
+.legdot{width:7px;height:7px;border-radius:50%}
+.chart-h{height:150px;position:relative}
 
-/* SECTION */
-.sec-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:8px;padding-left:2px}
+/* TABLES */
+.tbl-row{display:flex;align-items:center;padding:10px 13px;border-bottom:1px solid var(--b);gap:10px}
+.tbl-row:last-child{border-bottom:none}
+.tbl-rank{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--tx3);width:22px;flex-shrink:0;text-align:center}
+.tbl-name{flex:1;font-size:13px;font-weight:500;min-width:0}
+.tbl-sub{font-size:11px;color:var(--tx2);font-family:var(--mono)}
+.tbl-val{font-family:var(--mono);font-size:13px;font-weight:700;text-align:right;flex-shrink:0}
+.tbl-bar{height:3px;background:var(--b);border-radius:2px;margin:4px 0 0;overflow:hidden}
+.tbl-bar-fill{height:100%;border-radius:2px;background:var(--am);transition:width .5s}
 
-/* OUTLET TABLE */
-.outlet-table{background:var(--bg2);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin-bottom:14px}
-.outlet-row{display:flex;align-items:center;padding:11px 13px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .1s}
-.outlet-row:last-child{border-bottom:none}
-.outlet-row:active{background:var(--bg3)}
-.outlet-info{flex:1;min-width:0}
-.outlet-name{font-size:13px;font-weight:600}
-.outlet-meta{font-size:11px;color:var(--tx2);font-family:var(--mono);margin-top:2px;display:flex;align-items:center;gap:6px}
-.status-pip{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.pip-open{background:var(--gn)}
-.pip-closed{background:var(--rd)}
-.pip-idle{background:var(--tx3)}
-.outlet-nums{text-align:right;flex-shrink:0}
-.outlet-omset{font-size:14px;font-weight:700;font-family:var(--mono);color:var(--am)}
-.outlet-trx{font-size:10px;color:var(--tx2);font-family:var(--mono);margin-top:2px}
-.outlet-bar-wrap{height:3px;background:var(--b);border-radius:2px;margin:0 13px 10px;overflow:hidden}
-.outlet-bar{height:100%;border-radius:2px;background:var(--am);transition:width .5s}
+/* OUTLET DETAIL */
+.outlet-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;margin-bottom:8px;overflow:hidden;cursor:pointer}
+.outlet-head{padding:12px 13px;display:flex;align-items:center;justify-content:space-between}
+.outlet-body{border-top:1px solid var(--b);padding:12px 13px;display:none}
+.outlet-body.open{display:block}
+.met-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.met-box{background:var(--bg3);border-radius:8px;padding:9px}
+.met-label{font-size:9px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.met-val{font-size:13px;font-weight:700;font-family:var(--mono)}
+.mrow{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid var(--b);font-family:var(--mono)}
+.mrow:last-child{border-bottom:none}
+.mrow .l{color:var(--tx2)}
 
-/* DETAIL PANEL */
-.detail-panel{background:var(--bg3);border-top:1px solid var(--b);padding:12px 13px;display:none}
-.detail-panel.show{display:block}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
-.detail-box{background:var(--bg2);border-radius:8px;padding:9px 10px}
-.detail-label{font-size:9px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
-.detail-val{font-size:13px;font-weight:700;font-family:var(--mono)}
-.metode-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid var(--b);font-family:var(--mono)}
-.metode-row:last-child{border-bottom:none}
+/* STATUS DOTS */
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sdot.open{background:var(--gn)}
+.sdot.closed{background:var(--rd)}
+.sdot.idle{background:var(--tx3)}
 
-/* RANKING */
-.rank-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin-bottom:14px}
-.rank-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--b)}
-.rank-row:last-child{border-bottom:none}
-.rank-num{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--tx3);width:20px;flex-shrink:0}
-.rank-num.g1{color:#FFD700}.rank-num.g2{color:#C0C0C0}.rank-num.g3{color:#CD7F32}
-.rank-name{flex:1;font-size:13px;font-weight:500}
-.rank-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--am)}
+/* SOP GRID */
+.sop-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.sop-box{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:10px 7px;text-align:center}
+.sop-box.ok{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.05)}
+.sop-box.closed{border-color:rgba(239,68,68,.3)}
+.sop-nm{font-size:10px;font-weight:600;font-family:var(--mono);color:var(--tx2);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sop-ic{font-size:18px;margin-bottom:2px}
+.sop-st{font-size:9px;font-family:var(--mono);color:var(--tx3)}
 
-/* SOP MONITOR */
-.sop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.sop-box{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:10px 8px;text-align:center}
-.sop-box.ok{border-color:rgba(16,185,129,.4);background:var(--gnd)}
-.sop-box.miss{border-color:rgba(239,68,68,.3)}
-.sop-outlet{font-size:10px;font-weight:600;font-family:var(--mono);color:var(--tx2);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sop-icon{font-size:18px;margin-bottom:3px}
-.sop-status{font-size:9px;font-family:var(--mono);color:var(--tx3)}
+/* AI ANALYSIS */
+.ai-card{background:linear-gradient(135deg,rgba(139,92,246,.08) 0%,rgba(59,130,246,.06) 100%);border:1px solid rgba(139,92,246,.25);border-radius:14px;padding:14px;margin-bottom:12px;position:relative;overflow:hidden}
+.ai-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--pu),var(--bl));opacity:.6}
+.ai-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ai-icon{font-size:20px}
+.ai-title{font-size:13px;font-weight:700;color:var(--pu)}
+.ai-badge{font-size:9px;font-family:var(--mono);background:var(--pud);color:var(--pu);padding:2px 7px;border-radius:10px;border:1px solid rgba(139,92,246,.3)}
+.ai-body{font-size:13px;line-height:1.7;color:var(--tx2)}
+.ai-body strong{color:var(--tx);font-weight:600}
+.ai-section{margin-bottom:10px}
+.ai-section-title{font-size:10px;font-weight:700;color:var(--pu);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:5px}
+.ai-item{display:flex;gap:8px;margin-bottom:5px;font-size:12px;color:var(--tx2);line-height:1.5}
+.ai-item::before{content:'•';color:var(--pu);flex-shrink:0;margin-top:1px}
+.ai-item.warn::before{content:'⚠';color:var(--am)}
+.ai-item.good::before{content:'✓';color:var(--gn)}
+.ai-item.bad::before{content:'↓';color:var(--rd)}
+.ai-loading{text-align:center;padding:20px;color:var(--pu);font-size:13px;font-family:var(--mono)}
+.ai-loading-dot{animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.ai-btn{background:var(--pud);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:var(--pu);font-size:12px;font-family:var(--font);font-weight:600;padding:8px 14px;cursor:pointer;margin-top:10px;width:100%;transition:all .15s}
+.ai-btn:active{background:rgba(139,92,246,.2)}
 
-/* LOGIN */
-.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:24px}
-.login-card{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:28px 24px;width:100%;max-width:320px}
-.login-logo{text-align:center;margin-bottom:24px}
-.login-logo h1{font-size:22px;font-weight:800;color:var(--am)}
-.login-logo p{font-size:12px;color:var(--tx2);font-family:var(--mono);margin-top:4px}
-.form-label{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);display:block;margin-bottom:6px}
-.form-input{width:100%;background:var(--bg3);border:1.5px solid var(--b2);border-radius:8px;color:var(--tx);font-family:var(--mono);font-size:18px;padding:12px;outline:none;transition:border-color .2s;margin-bottom:12px;text-align:center;letter-spacing:6px}
-.form-input:focus{border-color:var(--am)}
-.btn-login{width:100%;background:var(--am);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:700;padding:13px;cursor:pointer;font-family:var(--font)}
-.err-msg{color:var(--rd);font-size:12px;font-family:var(--mono);margin-bottom:10px;text-align:center}
+/* BADGE */
+.badge{display:inline-flex;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600;font-family:var(--mono)}
+.bgn{background:var(--gnd);color:var(--gn)}
+.brd{background:var(--rdd);color:var(--rd)}
+.bam{background:var(--amd);color:var(--am)}
+.bbl{background:var(--bld);color:var(--bl)}
 
-/* LOADING / EMPTY */
+/* LOADING */
 .loading{text-align:center;padding:40px 20px}
-.loading-spin{font-size:28px;animation:spin 1s linear infinite;display:block;margin-bottom:10px}
+.spin{font-size:28px;animation:spin 1s linear infinite;display:block;margin-bottom:10px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-txt{font-size:12px;color:var(--tx2);font-family:var(--mono)}
+.spin-txt{font-size:12px;color:var(--tx2);font-family:var(--mono)}
 .empty{text-align:center;padding:24px;color:var(--tx3);font-size:12px;font-family:var(--mono)}
 .last-upd{text-align:center;font-size:10px;color:var(--tx3);font-family:var(--mono);padding:6px 0 2px}
+
+/* LOGIN */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:20px}
+.login-card{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:28px 24px;width:100%;max-width:300px;text-align:center}
+.login-logo{margin-bottom:24px}
+.login-logo h1{font-size:22px;font-weight:800;color:var(--am)}
+.login-logo p{font-size:11px;color:var(--tx2);font-family:var(--mono);margin-top:4px}
+.pin-inp{width:100%;background:var(--bg3);border:1.5px solid var(--b2);border-radius:8px;color:var(--am);font-family:var(--mono);font-size:24px;padding:12px;outline:none;text-align:center;letter-spacing:8px;margin-bottom:10px;transition:border-color .2s}
+.pin-inp:focus{border-color:var(--am)}
+.err-msg{color:var(--rd);font-size:11px;font-family:var(--mono);margin-bottom:8px}
+.btn-login{width:100%;background:var(--am);color:#000;border:none;border-radius:8px;font-size:14px;font-weight:700;padding:12px;cursor:pointer;font-family:var(--font)}
+
+/* PRODUK */
+.prod-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--b)}
+.prod-row:last-child{border-bottom:none}
+.prod-rank{font-size:12px;font-weight:700;font-family:var(--mono);color:var(--tx3);width:20px;flex-shrink:0}
+.prod-name{flex:1;min-width:0}
+.prod-nm{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-kat{font-size:10px;color:var(--tx3);font-family:var(--mono)}
+.prod-nums{text-align:right;flex-shrink:0}
+.prod-qty{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--am)}
+.prod-rev{font-size:10px;color:var(--tx2);font-family:var(--mono)}
+.sec-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:8px;padding-left:2px}
 </style>
 </head>
 <body>
 <div id="root"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
 <script>
 var SUPA_URL = 'https://xaixkcaeufxesqmdzhuv.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhaXhrY2FldWZ4ZXNxbWR6aHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5Njc1NzUsImV4cCI6MjA5NDU0MzU3NX0.nrFYxWfn8kA1JV6wyiW1X6KVRxKJi6yBnMPAGVIPTjY';
+var CLAUDE_API_KEY = ''; // Diisi otomatis dari Anthropic API via proxy
 var OWNER_PIN = '1111';
 
-var OUTLETS = [
-  {id:'OTL-A',nama:'Kedai Mencong'},
-  {id:'OTL-B',nama:'Kedai Tanser'},
-  {id:'OTL-C',nama:'Kedai Swadaya'},
-  {id:'OTL-D',nama:'Kedai Inpres'},
-  {id:'OTL-E',nama:'Kedai Kacang'},
-  {id:'OTL-F',nama:'Tekel 1'}
-];
+var OUTLETS=[{id:'OTL-A',nama:'Kedai Mencong'},{id:'OTL-B',nama:'Kedai Tanser'},{id:'OTL-C',nama:'Kedai Swadaya'},{id:'OTL-D',nama:'Kedai Inpres'},{id:'OTL-E',nama:'Kedai Kacang'},{id:'OTL-F',nama:'Tekel 1'}];
+var PERIODS=[{id:'today',l:'Hari Ini'},{id:'yesterday',l:'Kemarin'},{id:'week',l:'Minggu Ini'},{id:'lastweek',l:'Minggu Lalu'},{id:'month',l:'Bulan Ini'},{id:'lastmonth',l:'Bulan Lalu'},{id:'year',l:'Tahun Ini'}];
+var TABS=[{id:'overview',l:'Overview'},{id:'produk',l:'Produk'},{id:'outlet',l:'Outlet'},{id:'keuangan',l:'Keuangan'},{id:'analisis',l:'AI Analisis'}];
 
-var PERIODS = [
-  {id:'today',     label:'Hari Ini'},
-  {id:'yesterday', label:'Kemarin'},
-  {id:'week',      label:'Minggu Ini'},
-  {id:'lastweek',  label:'Minggu Lalu'},
-  {id:'month',     label:'Bulan Ini'},
-  {id:'lastmonth', label:'Bulan Lalu'},
-  {id:'year',      label:'Tahun Ini'}
-];
+var authed   = localStorage.getItem('dash_auth')==='1';
+var page     = 'overview';
+var period   = 'today';
+var expanded = {};
+var charts   = {};
+var refreshT = null;
+var cachedData = null;
 
-var authed     = localStorage.getItem('dash_auth') === '1';
-var period     = 'today';
-var expanded   = {};
-var chartInst  = null;
-var refreshInt = null;
+// ── DATE UTILS ────────────────────────────────────────────────
+function iso(d){return d.toISOString().slice(0,10);}
+function addD(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function startWeek(d){var r=new Date(d);r.setDate(r.getDate()-((r.getDay()||7)-1));return r;}
+function startMonth(d){return new Date(d.getFullYear(),d.getMonth(),1);}
+function startYear(d){return new Date(d.getFullYear(),0,1);}
 
-// ── DATE HELPERS ──────────────────────────────────────────────
-function toISO(d){ return d.toISOString().slice(0,10); }
-function addDays(d,n){ var r=new Date(d); r.setDate(r.getDate()+n); return r; }
-function startOfWeek(d){ var r=new Date(d); r.setDate(r.getDate()-r.getDay()+1); return r; }
-function startOfMonth(d){ return new Date(d.getFullYear(),d.getMonth(),1); }
-function startOfYear(d){ return new Date(d.getFullYear(),0,1); }
-
-function getPeriodRange(p) {
-  var today = new Date(); today.setHours(0,0,0,0);
-  var ranges = {
-    today:     { from: toISO(today), to: toISO(today) },
-    yesterday: { from: toISO(addDays(today,-1)), to: toISO(addDays(today,-1)) },
-    week:      { from: toISO(startOfWeek(today)), to: toISO(today) },
-    lastweek:  { from: toISO(startOfWeek(addDays(today,-7))), to: toISO(addDays(startOfWeek(today),-1)) },
-    month:     { from: toISO(startOfMonth(today)), to: toISO(today) },
-    lastmonth: { from: toISO(startOfMonth(addDays(today,-today.getDate()))), to: toISO(addDays(startOfMonth(today),-1)) },
-    year:      { from: toISO(startOfYear(today)), to: toISO(today) }
-  };
-  return ranges[p] || ranges.today;
+function getRange(p){
+  var t=new Date();t.setHours(0,0,0,0);
+  if(p==='today')     return{f:iso(t),t:iso(t)};
+  if(p==='yesterday') return{f:iso(addD(t,-1)),t:iso(addD(t,-1))};
+  if(p==='week')      return{f:iso(startWeek(t)),t:iso(t)};
+  if(p==='lastweek')  return{f:iso(startWeek(addD(t,-7))),t:iso(addD(startWeek(t),-1))};
+  if(p==='month')     return{f:iso(startMonth(t)),t:iso(t)};
+  if(p==='lastmonth'){var m=startMonth(t);return{f:iso(startMonth(addD(m,-1))),t:iso(addD(m,-1))};}
+  if(p==='year')      return{f:iso(startYear(t)),t:iso(t)};
+  return{f:iso(t),t:iso(t)};
+}
+function getPrev(p){
+  var t=new Date();t.setHours(0,0,0,0);
+  if(p==='today')     return{f:iso(addD(t,-1)),t:iso(addD(t,-1))};
+  if(p==='yesterday') return{f:iso(addD(t,-2)),t:iso(addD(t,-2))};
+  if(p==='week')      return{f:iso(startWeek(addD(t,-7))),t:iso(addD(startWeek(t),-1))};
+  if(p==='month')     return{f:iso(startMonth(addD(startMonth(t),-1))),t:iso(addD(startMonth(t),-1))};
+  return{f:iso(addD(t,-7)),t:iso(addD(t,-1))};
 }
 
-function getPrevRange(p) {
-  var today = new Date(); today.setHours(0,0,0,0);
-  var prev = {
-    today:     { from: toISO(addDays(today,-1)), to: toISO(addDays(today,-1)) },
-    yesterday: { from: toISO(addDays(today,-2)), to: toISO(addDays(today,-2)) },
-    week:      { from: toISO(startOfWeek(addDays(today,-7))), to: toISO(addDays(startOfWeek(today),-1)) },
-    lastweek:  { from: toISO(startOfWeek(addDays(today,-14))), to: toISO(addDays(startOfWeek(addDays(today,-7)),-1)) },
-    month:     { from: toISO(startOfMonth(addDays(today,-today.getDate()))), to: toISO(addDays(startOfMonth(today),-1)) },
-    lastmonth: { from: toISO(startOfMonth(addDays(startOfMonth(addDays(today,-today.getDate())),-1))), to: toISO(addDays(startOfMonth(addDays(today,-today.getDate())),-1)) },
-    year:      { from: toISO(new Date(today.getFullYear()-1,0,1)), to: toISO(new Date(today.getFullYear()-1,11,31)) }
-  };
-  return prev[p] || prev.today;
-}
-
-// ── SUPABASE FETCH ────────────────────────────────────────────
-function supaGet(table, filter) {
-  return fetch(SUPA_URL + '/rest/v1/' + table + '?' + filter, {
-    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
-  }).then(function(r){ return r.json(); });
+// ── SUPABASE ──────────────────────────────────────────────────
+function sg(table,filter){
+  return fetch(SUPA_URL+'/rest/v1/'+table+'?'+filter,{
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}
+  }).then(function(r){return r.json();});
 }
 
 // ── FORMAT ────────────────────────────────────────────────────
-function fmt(n){ return 'Rp ' + Math.round(n||0).toLocaleString('id-ID'); }
-function fmtS(n){
-  n = Math.round(n||0);
-  if(n>=1000000) return 'Rp '+(n/1000000).toFixed(1)+'jt';
-  if(n>=1000)    return 'Rp '+(n/1000).toFixed(0)+'rb';
-  return 'Rp '+n;
-}
-function deltaHtml(curr, prev) {
-  if (!prev || prev === 0) return '';
-  var pct = Math.round((curr-prev)/prev*100);
-  var cls = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
-  var sign = pct > 0 ? '▲' : pct < 0 ? '▼' : '=';
-  return '<span class="delta '+cls+'">'+sign+' '+Math.abs(pct)+'%</span>';
+function fmt(n){return'Rp '+Math.round(n||0).toLocaleString('id-ID');}
+function fmtS(n){n=Math.round(n||0);if(n>=1000000)return'Rp '+(n/1000000).toFixed(1)+'jt';if(n>=1000)return'Rp '+(n/1000).toFixed(0)+'rb';return'Rp '+n;}
+function dlt(c,p){
+  if(!p||p===0)return'';
+  var pct=Math.round((c-p)/p*100);
+  var cls=pct>0?'dup':pct<0?'ddown':'dflat';
+  return'<span class="delta '+cls+'">'+(pct>0?'▲':'▼')+Math.abs(pct)+'%</span>';
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────
-function renderLogin() {
-  document.getElementById('root').innerHTML =
-    '<div class="login-wrap"><div class="login-card">' +
-    '<div class="login-logo"><div style="font-size:40px;margin-bottom:8px">☕</div><h1>Teras Nyai</h1><p>Owner Dashboard</p></div>' +
-    '<label class="form-label">PIN Owner</label>' +
-    '<input class="form-input" type="password" id="pin" placeholder="••••" inputmode="numeric" maxlength="4">' +
-    '<div class="err-msg" id="perr" style="display:none">PIN salah</div>' +
-    '<button class="btn-login" onclick="doLogin()">Masuk →</button>' +
+function renderLogin(){
+  document.getElementById('root').innerHTML=
+    '<div class="login-wrap"><div class="login-card">'+
+    '<div class="login-logo"><div style="font-size:40px">☕</div><h1>Teras Nyai</h1><p>Owner Dashboard</p></div>'+
+    '<input class="pin-inp" type="password" id="pin" placeholder="••••" inputmode="numeric" maxlength="4">'+
+    '<div class="err-msg" id="perr" style="display:none">PIN salah</div>'+
+    '<button class="btn-login" onclick="doLogin()">Masuk →</button>'+
     '</div></div>';
-  document.getElementById('pin').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
-  setTimeout(function(){ var p=document.getElementById('pin'); if(p) p.focus(); },100);
+  document.getElementById('pin').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  setTimeout(function(){var p=document.getElementById('pin');if(p)p.focus();},100);
 }
-
-function doLogin() {
-  var pin = document.getElementById('pin').value;
-  if (pin === OWNER_PIN) {
-    localStorage.setItem('dash_auth','1');
-    authed = true;
-    renderShell();
-    loadData();
-  } else {
-    document.getElementById('perr').style.display='block';
-    document.getElementById('pin').value='';
-  }
+function doLogin(){
+  var pin=document.getElementById('pin').value;
+  if(pin===OWNER_PIN){localStorage.setItem('dash_auth','1');authed=true;renderShell();loadData();}
+  else{document.getElementById('perr').style.display='block';document.getElementById('pin').value='';}
 }
+function doLogout(){localStorage.removeItem('dash_auth');authed=false;if(refreshT)clearInterval(refreshT);renderLogin();}
 
 // ── SHELL ─────────────────────────────────────────────────────
-function renderShell() {
-  var periodTabs = PERIODS.map(function(p){
-    return '<button class="period-tab'+(p.id===period?' active':'')+'" onclick="setPeriod(\''+p.id+'\')">'+p.label+'</button>';
-  }).join('');
-
-  document.getElementById('root').innerHTML =
-    '<div class="topbar">' +
-    '<div><div class="brand">Teras <span>Nyai</span></div></div>' +
-    '<div style="display:flex;gap:8px;align-items:center">' +
-    '<span class="live-dot"></span>' +
-    '<button class="btn-sm" onclick="loadData()">↻</button>' +
-    '<button class="btn-sm btn-danger" onclick="doLogout()">Keluar</button>' +
-    '</div></div>' +
-    '<div class="period-wrap" id="period-tabs">'+periodTabs+'</div>' +
-    '<div class="content" id="content"><div class="loading"><span class="loading-spin">⏳</span><div class="loading-txt">Memuat data...</div></div></div>';
+function renderShell(){
+  var tabsHtml=TABS.map(function(t){return'<button class="nav-tab'+(t.id===page?' active':'')+'" onclick="setPage(\''+t.id+'\')">'+t.l+'</button>';}).join('');
+  var perHtml=PERIODS.map(function(p){return'<button class="ptab'+(p.id===period?' active':'')+'" onclick="setPeriod(\''+p.id+'\')">'+p.l+'</button>';}).join('');
+  document.getElementById('root').innerHTML=
+    '<div class="topbar">'+
+    '<div style="display:flex;align-items:center;gap:8px"><span class="live-dot"></span><div class="brand">Teras <span>Nyai</span></div></div>'+
+    '<div style="display:flex;gap:6px">'+
+    '<button class="tbtn" onclick="loadData()">↻ Refresh</button>'+
+    '<button class="tbtn danger" onclick="doLogout()">Keluar</button>'+
+    '</div></div>'+
+    '<div class="main-nav">'+tabsHtml+'</div>'+
+    '<div class="period-bar" id="period-bar">'+perHtml+'</div>'+
+    '<div id="main-content"><div class="loading"><span class="spin">⏳</span><div class="spin-txt">Memuat data...</div></div></div>';
 }
 
-function setPeriod(p) {
-  period = p;
-  document.querySelectorAll('.period-tab').forEach(function(t){
-    t.classList.toggle('active', t.textContent === PERIODS.find(function(x){ return x.id===p; }).label);
-  });
+function setPage(p){
+  page=p;
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.toggle('active',t.textContent===TABS.find(function(x){return x.id===p;}).l);});
+  // Sembunyikan period bar di tab analisis (tidak butuh filter)
+  var pb=document.getElementById('period-bar');
+  if(pb)pb.style.display=p==='analisis'?'none':'flex';
+  if(cachedData) renderPage(cachedData);
+}
+
+function setPeriod(p){
+  period=p;
+  document.querySelectorAll('.ptab').forEach(function(t){t.classList.toggle('active',t.textContent===PERIODS.find(function(x){return x.id===p;}).l);});
   loadData();
 }
 
-function doLogout() {
-  localStorage.removeItem('dash_auth');
-  authed = false;
-  if(refreshInt) clearInterval(refreshInt);
-  renderLogin();
-}
-
 // ── LOAD DATA ─────────────────────────────────────────────────
-function loadData() {
-  if(!document.getElementById('content')) return;
-  var r   = getPeriodRange(period);
-  var pr  = getPrevRange(period);
-  var today = new Date().toISOString().slice(0,10);
-  var yesterday = toISO(addDays(new Date(),- 1));
-
-  document.getElementById('content').innerHTML =
-    '<div class="loading"><span class="loading-spin">⏳</span><div class="loading-txt">Memuat data...</div></div>';
+function loadData(){
+  if(!document.getElementById('main-content'))return;
+  document.getElementById('main-content').innerHTML='<div class="loading"><span class="spin">⏳</span><div class="spin-txt">Memuat...</div></div>';
+  var r=getRange(period), pr=getPrev(period);
+  var today=iso(new Date()), yday=iso(addD(new Date(),-1));
 
   Promise.all([
-    // Current period
-    supaGet('transaksi', 'tgl=gte.'+r.from+'&tgl=lte.'+r.to+'&status=eq.LUNAS&select=outlet_id,total,hpp_total,gross_profit,metode_bayar,tgl'),
-    supaGet('pengeluaran', 'tgl=gte.'+r.from+'&tgl=lte.'+r.to+'&select=outlet_id,nominal,nama_akun,tgl'),
-    // Previous period for delta
-    supaGet('transaksi', 'tgl=gte.'+pr.from+'&tgl=lte.'+pr.to+'&status=eq.LUNAS&select=outlet_id,total,gross_profit,tgl'),
-    // Today's SOP & absensi (always today)
-    supaGet('sop_opening', 'tgl=eq.'+today+'&select=outlet_id,nama_crew,submitted_at'),
-    supaGet('sop_closing', 'tgl=eq.'+today+'&select=outlet_id,nama_crew,submitted_at'),
-    // Chart data: today hourly vs yesterday hourly
-    supaGet('transaksi', 'tgl=eq.'+today+'&status=eq.LUNAS&select=total,jam'),
-    supaGet('transaksi', 'tgl=eq.'+yesterday+'&status=eq.LUNAS&select=total,jam')
+    sg('transaksi','tgl=gte.'+r.f+'&tgl=lte.'+r.t+'&status=eq.LUNAS&select=outlet_id,total,hpp_total,gross_profit,metode_bayar,tgl,jam'),
+    sg('pengeluaran','tgl=gte.'+r.f+'&tgl=lte.'+r.t+'&select=outlet_id,nominal,nama_akun,kode_akun,tgl'),
+    sg('transaksi','tgl=gte.'+pr.f+'&tgl=lte.'+pr.t+'&status=eq.LUNAS&select=total,gross_profit'),
+    sg('transaksi_detail','tgl=gte.'+r.f+'&tgl=lte.'+r.t+'&select=nama_menu,kategori,qty,subtotal,gross_profit,harga_jual,hpp_satuan'),
+    sg('sop_opening','tgl=eq.'+today+'&select=outlet_id,nama_crew,submitted_at'),
+    sg('sop_closing','tgl=eq.'+today+'&select=outlet_id,nama_crew,submitted_at'),
+    sg('transaksi','tgl=eq.'+today+'&status=eq.LUNAS&select=total,jam'),
+    sg('transaksi','tgl=eq.'+yday+'&status=eq.LUNAS&select=total,jam'),
+    sg('absensi','tgl=eq.'+today+'&tipe=eq.MASUK&select=outlet_id,emp_nama,jam')
   ]).then(function(res){
-    renderDashboard(res[0]||[], res[1]||[], res[2]||[], res[3]||[], res[4]||[], res[5]||[], res[6]||[]);
+    cachedData={trx:res[0]||[],kel:res[1]||[],prevTrx:res[2]||[],det:res[3]||[],opens:res[4]||[],closes:res[5]||[],todayH:res[6]||[],ydayH:res[7]||[],absen:res[8]||[]};
+    renderPage(cachedData);
+    if(refreshT)clearInterval(refreshT);
+    refreshT=setInterval(loadData,60000);
   }).catch(function(e){
-    document.getElementById('content').innerHTML='<div class="empty">⚠️ Gagal: '+e.message+'</div>';
+    document.getElementById('main-content').innerHTML='<div class="empty">⚠️ Gagal: '+e.message+'</div>';
   });
 }
 
-// ── RENDER ────────────────────────────────────────────────────
-function renderDashboard(trx, kel, prevTrx, opens, closes, todayTrx, yesterdayTrx) {
-  var totalOmset = trx.reduce(function(s,t){return s+t.total;},0);
-  var totalGross = trx.reduce(function(s,t){return s+t.gross_profit;},0);
-  var totalHPP   = trx.reduce(function(s,t){return s+t.hpp_total;},0);
-  var totalKel   = kel.reduce(function(s,k){return s+k.nominal;},0);
-  var totalTrx   = trx.length;
-  var netProfit  = totalGross - totalKel;
+function renderPage(d){
+  if(page==='overview')   renderOverview(d);
+  else if(page==='produk')     renderProduk(d);
+  else if(page==='outlet')     renderOutlet(d);
+  else if(page==='keuangan')   renderKeuangan(d);
+  else if(page==='analisis')   renderAnalisis(d);
+}
 
-  var prevOmset  = prevTrx.reduce(function(s,t){return s+t.total;},0);
-  var prevGross  = prevTrx.reduce(function(s,t){return s+t.gross_profit;},0);
+// ══════════════════════════════════════════════════════════════
+//  PAGE: OVERVIEW
+// ══════════════════════════════════════════════════════════════
+function renderOverview(d){
+  var trx=d.trx,kel=d.kel,prev=d.prevTrx,opens=d.opens,closes=d.closes;
+  var omset=trx.reduce(function(s,t){return s+t.total;},0);
+  var gross=trx.reduce(function(s,t){return s+t.gross_profit;},0);
+  var hpp=trx.reduce(function(s,t){return s+t.hpp_total;},0);
+  var keluar=kel.reduce(function(s,k){return s+k.nominal;},0);
+  var net=gross-keluar;
+  var pOmset=prev.reduce(function(s,t){return s+t.total;},0);
+  var pGross=prev.reduce(function(s,t){return s+t.gross_profit;},0);
+  var avgTrx=trx.length?Math.round(omset/trx.length):0;
+  var outletBuka=opens.filter(function(o,i,a){return a.findIndex(function(x){return x.outlet_id===o.outlet_id;})===i;}).length;
 
-  var periodLabel = PERIODS.find(function(p){return p.id===period;}).label;
+  var html='';
+  // Summary
+  html+='<div class="sum2">';
+  html+=sc('Total Omset',fmtS(omset),trx.length+' trx '+dlt(omset,pOmset),'var(--am)');
+  html+=sc('Gross Profit',fmtS(gross),Math.round(gross/Math.max(omset,1)*100)+'% margin '+dlt(gross,pGross),'var(--gn)');
+  html+=sc('Pengeluaran',fmtS(keluar),kel.length+' item','var(--rd)');
+  html+=sc('Net Profit',fmtS(net),net>=0?'Untung':'Rugi',net>=0?'var(--gn)':'var(--rd)');
+  html+='</div>';
 
-  var html = '';
+  // Quick stats
+  html+='<div class="sum2" style="margin-bottom:12px">';
+  html+=sc('Avg per Trx',fmtS(avgTrx),'Nilai rata-rata','var(--bl)');
+  html+=sc('Outlet Aktif',outletBuka+'/'+OUTLETS.length,'Sudah opening hari ini',outletBuka===OUTLETS.length?'var(--gn)':'var(--am)');
+  html+='</div>';
 
-  // ── SUMMARY CARDS ──
-  html += '<div class="sum-grid">';
-  html += sumCard('Total Omset', fmtS(totalOmset), totalTrx+' transaksi', 'var(--am)', deltaHtml(totalOmset, prevOmset));
-  html += sumCard('Gross Profit', fmtS(totalGross), Math.round(totalGross/Math.max(totalOmset,1)*100)+'% margin', 'var(--gn)', deltaHtml(totalGross, prevGross));
-  html += sumCard('Pengeluaran', fmtS(totalKel), kel.length+' item', 'var(--rd)', '');
-  html += sumCard('Net Profit', fmtS(netProfit), netProfit>=0?'Untung':'Rugi', netProfit>=0?'var(--gn)':'var(--rd)', '');
-  html += '</div>';
+  // Chart
+  html+='<div class="chart-card">';
+  html+='<div class="chart-label">Penjualan per Jam<div class="chart-legend"><div class="leg"><div class="legdot" style="background:var(--am)"></div>Hari ini</div><div class="leg"><div class="legdot" style="background:#444"></div>Kemarin</div></div></div>';
+  html+='<div class="chart-h"><canvas id="ch1"></canvas></div></div>';
 
-  // ── GRAFIK HARI INI vs KEMARIN ──
-  html += '<div class="chart-card">';
-  html += '<div class="chart-title">Penjualan per Jam';
-  html += '<div class="chart-legend">';
-  html += '<div class="legend-item"><div class="legend-dot" style="background:var(--am)"></div>Hari ini</div>';
-  html += '<div class="legend-item"><div class="legend-dot" style="background:var(--b2)"></div>Kemarin</div>';
-  html += '</div></div>';
-  html += '<div class="chart-wrap"><canvas id="trxChart"></canvas></div>';
-  html += '</div>';
+  // SOP Monitor
+  html+='<div class="sec-title">Status SOP Hari Ini</div>';
+  html+='<div class="sop-g">';
+  OUTLETS.forEach(function(o){
+    var op=opens.some(function(x){return x.outlet_id===o.id;});
+    var cl=closes.some(function(x){return x.outlet_id===o.id;});
+    html+='<div class="sop-box'+(cl?' closed':op?' ok':'')+'">';
+    html+='<div class="sop-nm">'+o.nama.replace('Kedai ','')+'</div>';
+    html+='<div class="sop-ic">'+(cl?'🔒':op?'🟢':'⚫')+'</div>';
+    html+='<div class="sop-st">'+(cl?'Tutup':op?'Buka':'Belum')+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
 
-  // ── RANKING OUTLET ──
-  var outletData = OUTLETS.map(function(o){
-    var oTrx = trx.filter(function(t){return t.outlet_id===o.id;});
-    return {
-      id: o.id, nama: o.nama,
-      omset: oTrx.reduce(function(s,t){return s+t.total;},0),
-      trxCount: oTrx.length,
-      gross: oTrx.reduce(function(s,t){return s+t.gross_profit;},0),
-      hpp: oTrx.reduce(function(s,t){return s+t.hpp_total;},0),
-      keluar: kel.filter(function(k){return k.outlet_id===o.id;}).reduce(function(s,k){return s+k.nominal;},0),
-      tunai: oTrx.filter(function(t){return t.metode_bayar==='TUNAI';}).reduce(function(s,t){return s+t.total;},0),
-      qris:  oTrx.filter(function(t){return t.metode_bayar==='QRIS';}).reduce(function(s,t){return s+t.total;},0),
-      transfer: oTrx.filter(function(t){return t.metode_bayar==='TRANSFER';}).reduce(function(s,t){return s+t.total;},0),
-      isOpen: opens.some(function(o2){return o2.outlet_id===o.id;}),
-      isClosed: closes.some(function(c){return c.outlet_id===o.id;}),
-      openInfo: opens.filter(function(o2){return o2.outlet_id===o.id;}),
-      closeInfo: closes.filter(function(c){return c.outlet_id===o.id;})
-    };
+  // Ranking cepat
+  html+='<div class="sec-title">Ranking Outlet</div>';
+  html+='<div class="card"><div>';
+  var outRank=OUTLETS.map(function(o){
+    var oT=trx.filter(function(t){return t.outlet_id===o.id;});
+    return{nama:o.nama,omset:oT.reduce(function(s,t){return s+t.total;},0),cnt:oT.length};
   }).sort(function(a,b){return b.omset-a.omset;});
-
-  var maxOmset = outletData[0] ? outletData[0].omset : 1;
-
-  // Ranking strip
-  html += '<div class="sec-title">Ranking Outlet — '+periodLabel+'</div>';
-  html += '<div class="rank-card">';
-  outletData.forEach(function(o, i) {
-    html += '<div class="rank-row">';
-    html += '<div class="rank-num'+(i<3?' g'+(i+1):'')+'">'+( i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)) +'</div>';
-    html += '<div class="rank-name">'+o.nama+'</div>';
-    html += '<div class="rank-val">'+fmtS(o.omset)+'</div>';
-    html += '</div>';
+  var mx=outRank[0]?outRank[0].omset:1;
+  outRank.forEach(function(o,i){
+    var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+    html+='<div class="tbl-row">';
+    html+='<div class="tbl-rank">'+medal+'</div>';
+    html+='<div style="flex:1"><div class="tbl-name">'+o.nama+'</div>';
+    html+='<div class="tbl-bar"><div class="tbl-bar-fill" style="width:'+Math.round(o.omset/mx*100)+'%"></div></div></div>';
+    html+='<div class="tbl-val" style="color:var(--am)">'+fmtS(o.omset)+'</div>';
+    html+='</div>';
   });
-  html += '</div>';
+  html+='</div></div>';
 
-  // ── OUTLET DETAIL ──
-  html += '<div class="sec-title">Detail Per Outlet</div>';
-  html += '<div class="outlet-table">';
-  outletData.forEach(function(o) {
-    var statusCls = o.isClosed?'pip-closed':o.isOpen?'pip-open':'pip-idle';
-    var statusTxt = o.isClosed?'Sudah Tutup':o.isOpen?'Buka':'Belum Buka';
-    var pct = maxOmset > 0 ? Math.round(o.omset/maxOmset*100) : 0;
-    var isExp = expanded[o.id];
-
-    html += '<div>';
-    html += '<div class="outlet-row" onclick="toggleEx(\''+o.id+'\')">';
-    html += '<div class="outlet-info">';
-    html += '<div class="outlet-name">'+o.nama+'</div>';
-    html += '<div class="outlet-meta">';
-    html += '<span class="status-pip '+statusCls+'"></span>';
-    html += '<span>'+statusTxt+'</span>';
-    html += '<span>· '+o.trxCount+' trx</span>';
-    html += '</div></div>';
-    html += '<div class="outlet-nums">';
-    html += '<div class="outlet-omset">'+fmtS(o.omset)+'</div>';
-    html += '<div class="outlet-trx">Gross: '+fmtS(o.gross)+'</div>';
-    html += '</div></div>';
-    // Progress bar
-    html += '<div class="outlet-bar-wrap"><div class="outlet-bar" style="width:'+pct+'%"></div></div>';
-
-    // Expandable detail
-    html += '<div class="detail-panel'+(isExp?' show':'')+'" id="dp-'+o.id+'">';
-    html += '<div class="detail-grid">';
-    html += detBox('HPP', fmtS(o.hpp), 'var(--tx2)');
-    html += detBox('Pengeluaran', fmtS(o.keluar), 'var(--rd)');
-    html += detBox('Net', fmtS(o.gross-o.keluar), (o.gross-o.keluar)>=0?'var(--gn)':'var(--rd)');
-    html += '</div>';
-    html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Metode Bayar</div>';
-    html += mRow('Tunai', o.tunai);
-    html += mRow('QRIS', o.qris);
-    html += mRow('Transfer', o.transfer);
-    // SOP status
-    html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 4px">Status SOP</div>';
-    var op = o.openInfo[0];
-    var cl = o.closeInfo[0];
-    html += mRow('Opening', op ? (op.nama_crew+' '+new Date(op.submitted_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})) : '✗ Belum', null, op?'var(--gn)':'var(--rd)');
-    html += mRow('Closing', cl ? (cl.nama_crew+' '+new Date(cl.submitted_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})) : '✗ Belum', null, cl?'var(--gn)':'var(--rd)');
-    html += '</div></div>';
-  });
-  html += '</div>';
-
-  // ── SOP MONITOR GRID ──
-  html += '<div class="sec-title">Monitor SOP Hari Ini</div>';
-  html += '<div class="sop-grid">';
-  OUTLETS.forEach(function(o) {
-    var hasOpen  = opens.some(function(x){return x.outlet_id===o.id;});
-    var hasClose = closes.some(function(x){return x.outlet_id===o.id;});
-    var ok = hasOpen;
-    html += '<div class="sop-box'+(ok?' ok':'')+'">';
-    html += '<div class="sop-outlet">'+o.nama.replace('Kedai ','')+'</div>';
-    html += '<div class="sop-icon">'+(hasClose?'🔒':hasOpen?'🟢':'⚫')+'</div>';
-    html += '<div class="sop-status">'+(hasClose?'Tutup':hasOpen?'Buka':'Belum')+'</div>';
-    html += '</div>';
-  });
-  html += '</div>';
-
-  html += '<div class="last-upd">Update: '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · Auto-refresh 60 detik</div>';
-
-  document.getElementById('content').innerHTML = html;
-
-  // ── RENDER CHART ──
-  renderChart(todayTrx, yesterdayTrx);
-
-  // Auto-refresh
-  if(refreshInt) clearInterval(refreshInt);
-  refreshInt = setInterval(loadData, 60000);
+  html+='<div class="last-upd">Update: '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' · Auto-refresh 60s</div>';
+  document.getElementById('main-content').innerHTML=html;
+  renderHourChart('ch1',d.todayH,d.ydayH);
 }
 
-// ── CHART ─────────────────────────────────────────────────────
-function renderChart(todayTrx, yesterdayTrx) {
-  var hours = [];
-  for(var h=6; h<=23; h++) hours.push(h);
+// ══════════════════════════════════════════════════════════════
+//  PAGE: PRODUK
+// ══════════════════════════════════════════════════════════════
+function renderProduk(d){
+  var det=d.det;
+  // Agregasi per menu
+  var menuMap={};
+  det.forEach(function(item){
+    var k=item.nama_menu;
+    if(!menuMap[k])menuMap[k]={nama:k,kat:item.kategori||'-',qty:0,rev:0,gross:0,hpp:0};
+    menuMap[k].qty+=item.qty||0;
+    menuMap[k].rev+=item.subtotal||0;
+    menuMap[k].gross+=item.gross_profit||0;
+    menuMap[k].hpp+=((item.hpp_satuan||0)*(item.qty||0));
+  });
+  var menus=Object.values(menuMap).sort(function(a,b){return b.qty-a.qty;});
 
-  function aggByHour(trxList) {
-    var agg = {};
-    hours.forEach(function(h){ agg[h] = 0; });
-    trxList.forEach(function(t) {
-      var h = parseInt((t.jam||'00:00').slice(0,2));
-      if(agg[h] !== undefined) agg[h] += t.total;
+  // Agregasi per kategori
+  var katMap={};
+  det.forEach(function(item){
+    var k=item.kategori||'Lainnya';
+    if(!katMap[k])katMap[k]={kat:k,qty:0,rev:0,gross:0};
+    katMap[k].qty+=item.qty||0;
+    katMap[k].rev+=item.subtotal||0;
+    katMap[k].gross+=item.gross_profit||0;
+  });
+  var kats=Object.values(katMap).sort(function(a,b){return b.rev-a.rev;});
+
+  var html='';
+
+  // Top menu by qty
+  html+='<div class="sec-title">Menu Terlaris (Qty)</div>';
+  html+='<div class="card"><div>';
+  var topQty=menus.slice(0,10);
+  var mxQ=topQty[0]?topQty[0].qty:1;
+  topQty.forEach(function(m,i){
+    html+='<div class="prod-row">';
+    html+='<div class="prod-rank">'+(i+1)+'</div>';
+    html+='<div class="prod-name"><div class="prod-nm">'+m.nama+'</div>';
+    html+='<div class="prod-kat">'+m.kat+'</div>';
+    html+='<div class="tbl-bar"><div class="tbl-bar-fill" style="width:'+Math.round(m.qty/mxQ*100)+'%"></div></div></div>';
+    html+='<div class="prod-nums"><div class="prod-qty">'+m.qty+' pcs</div><div class="prod-rev">'+fmtS(m.rev)+'</div></div>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+
+  // Top menu by revenue
+  html+='<div class="sec-title">Menu Pendapatan Tertinggi</div>';
+  html+='<div class="card"><div>';
+  var topRev=menus.slice().sort(function(a,b){return b.rev-a.rev;}).slice(0,10);
+  var mxR=topRev[0]?topRev[0].rev:1;
+  topRev.forEach(function(m,i){
+    var margin=m.rev>0?Math.round(m.gross/m.rev*100):0;
+    html+='<div class="prod-row">';
+    html+='<div class="prod-rank">'+(i+1)+'</div>';
+    html+='<div class="prod-name"><div class="prod-nm">'+m.nama+'</div>';
+    html+='<div class="prod-kat">Margin: '+margin+'%</div>';
+    html+='<div class="tbl-bar"><div class="tbl-bar-fill" style="width:'+Math.round(m.rev/mxR*100)+'%;background:var(--gn)"></div></div></div>';
+    html+='<div class="prod-nums"><div class="prod-qty" style="color:var(--gn)">'+fmtS(m.rev)+'</div><div class="prod-rev">'+m.qty+' pcs</div></div>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+
+  // Menu margin rendah (perlu perhatian)
+  var lowMargin=menus.filter(function(m){return m.qty>0&&(m.rev>0?m.gross/m.rev:0)<0.2;}).sort(function(a,b){return(a.rev>0?a.gross/a.rev:0)-(b.rev>0?b.gross/b.rev:0);}).slice(0,5);
+  if(lowMargin.length>0){
+    html+='<div class="sec-title">⚠️ Menu Margin Rendah (&lt;20%)</div>';
+    html+='<div class="card"><div>';
+    lowMargin.forEach(function(m){
+      var mg=m.rev>0?Math.round(m.gross/m.rev*100):0;
+      html+='<div class="prod-row">';
+      html+='<div style="flex:1"><div class="prod-nm">'+m.nama+'</div><div class="prod-kat">'+m.kat+'</div></div>';
+      html+='<div style="text-align:right"><span class="badge brd">Margin '+mg+'%</span><div style="font-size:10px;color:var(--tx2);font-family:var(--mono);margin-top:2px">'+m.qty+' terjual</div></div>';
+      html+='</div>';
     });
-    return hours.map(function(h){ return agg[h]; });
+    html+='</div></div>';
   }
 
-  var todayData     = aggByHour(todayTrx);
-  var yesterdayData = aggByHour(yesterdayTrx);
-  var labels        = hours.map(function(h){ return h+'.00'; });
+  // Per kategori
+  html+='<div class="sec-title">Penjualan per Kategori</div>';
+  html+='<div class="chart-card"><div class="chart-label">Omset per Kategori</div>';
+  html+='<div class="chart-h"><canvas id="ch2"></canvas></div></div>';
 
-  var ctx = document.getElementById('trxChart');
-  if(!ctx) return;
+  document.getElementById('main-content').innerHTML=html;
+  renderKatChart('ch2',kats);
+}
 
-  if(chartInst) { chartInst.destroy(); chartInst = null; }
+// ══════════════════════════════════════════════════════════════
+//  PAGE: OUTLET
+// ══════════════════════════════════════════════════════════════
+function renderOutlet(d){
+  var trx=d.trx,kel=d.kel,opens=d.opens,closes=d.closes,absen=d.absen;
+  var html='';
 
-  chartInst = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Hari Ini',
-          data: todayData,
-          backgroundColor: 'rgba(245,158,11,0.7)',
-          borderColor: '#f59e0b',
-          borderWidth: 1,
-          borderRadius: 3
-        },
-        {
-          label: 'Kemarin',
-          data: yesterdayData,
-          backgroundColor: 'rgba(60,60,60,0.6)',
-          borderColor: '#444',
-          borderWidth: 1,
-          borderRadius: 3
-        }
+  OUTLETS.forEach(function(o){
+    var oT=trx.filter(function(t){return t.outlet_id===o.id;});
+    var oK=kel.filter(function(k){return k.outlet_id===o.id;});
+    var oA=absen.filter(function(a){return a.outlet_id===o.id;});
+    var omset=oT.reduce(function(s,t){return s+t.total;},0);
+    var gross=oT.reduce(function(s,t){return s+t.gross_profit;},0);
+    var hpp=oT.reduce(function(s,t){return s+t.hpp_total;},0);
+    var keluar=oK.reduce(function(s,k){return s+k.nominal;},0);
+    var tunai=oT.filter(function(t){return t.metode_bayar==='TUNAI';}).reduce(function(s,t){return s+t.total;},0);
+    var qris=oT.filter(function(t){return t.metode_bayar==='QRIS';}).reduce(function(s,t){return s+t.total;},0);
+    var transfer=oT.filter(function(t){return t.metode_bayar==='TRANSFER';}).reduce(function(s,t){return s+t.total;},0);
+    var isOpen=opens.some(function(x){return x.outlet_id===o.id;});
+    var isClosed=closes.some(function(x){return x.outlet_id===o.id;});
+    var dotCls=isClosed?'closed':isOpen?'open':'idle';
+    var isExp=expanded[o.id];
+
+    html+='<div class="outlet-card" onclick="toggleEx(\''+o.id+'\')">';
+    html+='<div class="outlet-head">';
+    html+='<div><div style="display:flex;align-items:center;gap:7px"><div class="sdot '+dotCls+'"></div><div style="font-size:14px;font-weight:700">'+o.nama+'</div></div>';
+    html+='<div style="font-size:11px;color:var(--tx2);font-family:var(--mono);margin-top:3px">'+oT.length+' trx · '+(isClosed?'Sudah Tutup':isOpen?'Buka':'Belum Buka')+'</div></div>';
+    html+='<div style="text-align:right"><div style="font-size:18px;font-weight:700;font-family:var(--mono);color:var(--am)">'+fmtS(omset)+'</div>';
+    html+='<div style="font-size:11px;color:var(--gn);font-family:var(--mono)">'+fmtS(gross)+' profit</div></div>';
+    html+='</div>';
+
+    html+='<div class="outlet-body'+(isExp?' open':'')+'">';
+    html+='<div class="met-grid">';
+    html+=mb('HPP',fmtS(hpp),'var(--tx2)');
+    html+=mb('Pengeluaran',fmtS(keluar),'var(--rd)');
+    html+=mb('Net',fmtS(gross-keluar),(gross-keluar)>=0?'var(--gn)':'var(--rd)');
+    html+='</div>';
+    html+='<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Metode Bayar</div>';
+    html+=mr('Tunai',tunai);html+=mr('QRIS',qris);html+=mr('Transfer',transfer);
+
+    if(oA.length>0){
+      html+='<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 5px">Crew Hadir</div>';
+      oA.forEach(function(a){html+=mr(a.emp_nama,(a.jam||'').slice(0,5),true);});
+    }
+    if(oK.length>0){
+      html+='<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 5px">Pengeluaran</div>';
+      oK.forEach(function(k){html+='<div class="mrow"><span class="l">'+(k.nama_akun||'-')+'</span><span style="color:var(--rd)">'+fmt(k.nominal)+'</span></div>';});
+    }
+    html+='</div></div>';
+  });
+
+  document.getElementById('main-content').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PAGE: KEUANGAN
+// ══════════════════════════════════════════════════════════════
+function renderKeuangan(d){
+  var trx=d.trx,kel=d.kel,prev=d.prevTrx;
+  var omset=trx.reduce(function(s,t){return s+t.total;},0);
+  var gross=trx.reduce(function(s,t){return s+t.gross_profit;},0);
+  var hpp=trx.reduce(function(s,t){return s+t.hpp_total;},0);
+  var keluar=kel.reduce(function(s,k){return s+k.nominal;},0);
+  var net=gross-keluar;
+  var pOmset=prev.reduce(function(s,t){return s+t.total;},0);
+  var pGross=prev.reduce(function(s,t){return s+t.gross_profit;},0);
+  var margin=omset>0?Math.round(gross/omset*100):0;
+
+  var html='';
+
+  // P&L Summary
+  html+='<div class="card"><div class="card-head"><span class="card-title">Laporan P&L</span></div><div class="card-body">';
+  html+=plRow('Total Pendapatan',omset,'var(--am)',true);
+  html+=plRow('HPP (Total)',hpp,'var(--tx2)',false);
+  html+=plRow('Gross Profit',gross,'var(--gn)',true);
+  html+=plRow('Total Pengeluaran',keluar,'var(--rd)',false);
+  html+='<div style="border-top:1.5px solid var(--b2);margin:8px 0"></div>';
+  html+=plRow('NET PROFIT',net,net>=0?'var(--gn)':'var(--rd)',true,true);
+  html+='</div></div>';
+
+  // Margin
+  html+='<div class="sum2">';
+  html+=sc('Gross Margin',margin+'%','dari total pendapatan',margin>40?'var(--gn)':margin>20?'var(--am)':'var(--rd)');
+  html+=sc('Avg per Trx',fmtS(trx.length?Math.round(omset/trx.length):0),trx.length+' transaksi','var(--bl)');
+  html+='</div>';
+
+  // Breakdown pengeluaran per akun
+  var akunMap={};
+  kel.forEach(function(k){
+    var a=k.nama_akun||'Lainnya';
+    if(!akunMap[a])akunMap[a]={nama:a,total:0};
+    akunMap[a].total+=k.nominal;
+  });
+  var akuns=Object.values(akunMap).sort(function(a,b){return b.total-a.total;});
+
+  if(akuns.length>0){
+    html+='<div class="sec-title">Breakdown Pengeluaran</div>';
+    html+='<div class="card"><div>';
+    var mxK=akuns[0].total;
+    akuns.forEach(function(a){
+      html+='<div class="tbl-row">';
+      html+='<div style="flex:1"><div style="font-size:13px;font-weight:500">'+a.nama+'</div>';
+      html+='<div class="tbl-bar"><div class="tbl-bar-fill" style="width:'+Math.round(a.total/mxK*100)+'%;background:var(--rd)"></div></div></div>';
+      html+='<div class="tbl-val" style="color:var(--rd)">'+fmtS(a.total)+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
+
+  // Metode bayar breakdown
+  html+='<div class="sec-title">Breakdown Metode Bayar</div>';
+  html+='<div class="card"><div class="card-body">';
+  var methods=['TUNAI','QRIS','TRANSFER','KARTU'];
+  methods.forEach(function(m){
+    var val=trx.filter(function(t){return t.metode_bayar===m;}).reduce(function(s,t){return s+t.total;},0);
+    var pct=omset>0?Math.round(val/omset*100):0;
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b)">';
+    html+='<span style="font-size:13px;color:var(--tx2)">'+m+'</span>';
+    html+='<div style="text-align:right"><div style="font-family:var(--mono);font-size:13px;font-weight:700">'+fmtS(val)+'</div>';
+    html+='<div style="font-size:10px;color:var(--tx3);font-family:var(--mono)">'+pct+'%</div></div>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+
+  // Grafik tren
+  html+='<div class="chart-card"><div class="chart-label">Tren Penjualan per Jam</div>';
+  html+='<div class="chart-h"><canvas id="ch3"></canvas></div></div>';
+
+  document.getElementById('main-content').innerHTML=html;
+  renderHourChart('ch3',d.todayH,d.ydayH);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PAGE: AI ANALISIS
+// ══════════════════════════════════════════════════════════════
+function renderAnalisis(d){
+  var html='';
+  html+='<div class="ai-card">';
+  html+='<div class="ai-header"><div class="ai-icon">🤖</div>';
+  html+='<div><div class="ai-title">AI Business Analyst</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">Powered by Claude · Data real-time Teras Nyai</div></div>';
+  html+='<span class="ai-badge">LIVE</span></div>';
+  html+='<div id="ai-content"><div class="ai-loading">Menganalisis data bisnis<span class="ai-loading-dot">...</span></div></div>';
+  html+='<button class="ai-btn" onclick="refreshAnalisis()">↻ Perbarui Analisis</button>';
+  html+='</div>';
+
+  // Quick insights manual (selalu tampil)
+  var trx=d.trx,kel=d.kel,det=d.det;
+  var omset=trx.reduce(function(s,t){return s+t.total;},0);
+  var gross=trx.reduce(function(s,t){return s+t.gross_profit;},0);
+  var keluar=kel.reduce(function(s,k){return s+k.nominal;},0);
+  var net=gross-keluar;
+  var margin=omset>0?Math.round(gross/omset*100):0;
+
+  // Hitung top outlet
+  var outletStats=OUTLETS.map(function(o){
+    var oT=trx.filter(function(t){return t.outlet_id===o.id;});
+    return{nama:o.nama,omset:oT.reduce(function(s,t){return s+t.total;},0),cnt:oT.length};
+  }).sort(function(a,b){return b.omset-a.omset;});
+
+  // Hitung top menu
+  var menuMap={};
+  det.forEach(function(item){
+    if(!menuMap[item.nama_menu])menuMap[item.nama_menu]={qty:0,rev:0,gross:0};
+    menuMap[item.nama_menu].qty+=item.qty||0;
+    menuMap[item.nama_menu].rev+=item.subtotal||0;
+    menuMap[item.nama_menu].gross+=item.gross_profit||0;
+  });
+  var topMenu=Object.entries(menuMap).sort(function(a,b){return b[1].qty-a[1].qty;}).slice(0,3);
+
+  // Low margin items
+  var lowM=Object.entries(menuMap).filter(function(e){return e[1].qty>0&&(e[1].rev>0?e[1].gross/e[1].rev:0)<0.2;});
+
+  html+='<div class="card" style="margin-top:12px"><div class="card-head"><span class="card-title">📊 Ringkasan Cepat</span></div><div class="card-body">';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
+  html+=metBox('Omset',fmtS(omset),'var(--am)');
+  html+=metBox('Net Profit',fmtS(net),net>=0?'var(--gn)':'var(--rd)');
+  html+=metBox('Margin',margin+'%',margin>40?'var(--gn)':margin>20?'var(--am)':'var(--rd)');
+  html+=metBox('Transaksi',trx.length+' trx','var(--bl)');
+  html+='</div>';
+
+  if(outletStats[0]&&outletStats[0].omset>0){
+    html+='<div style="font-size:11px;color:var(--tx2);font-family:var(--mono);margin-bottom:4px">🏆 Outlet terbaik: <strong style="color:var(--am)">'+outletStats[0].nama+'</strong> ('+fmtS(outletStats[0].omset)+')</div>';
+  }
+  if(topMenu.length>0){
+    html+='<div style="font-size:11px;color:var(--tx2);font-family:var(--mono);margin-bottom:4px">🍽️ Menu terlaris: <strong style="color:var(--am)">'+topMenu[0][0]+'</strong> ('+topMenu[0][1].qty+' pcs)</div>';
+  }
+  if(lowM.length>0){
+    html+='<div style="font-size:11px;color:var(--rd);font-family:var(--mono)">⚠️ '+lowM.length+' menu margin rendah — perlu evaluasi HPP</div>';
+  }
+  html+='</div></div>';
+
+  document.getElementById('main-content').innerHTML=html;
+
+  // Load AI analysis
+  loadAIAnalysis(d);
+}
+
+function loadAIAnalysis(d){
+  var trx=d.trx,kel=d.kel,det=d.det,opens=d.opens,closes=d.closes;
+  var omset=trx.reduce(function(s,t){return s+t.total;},0);
+  var gross=trx.reduce(function(s,t){return s+t.gross_profit;},0);
+  var hpp=trx.reduce(function(s,t){return s+t.hpp_total;},0);
+  var keluar=kel.reduce(function(s,k){return s+k.nominal;},0);
+  var net=gross-keluar;
+  var margin=omset>0?(gross/omset*100).toFixed(1):0;
+
+  var outletData=OUTLETS.map(function(o){
+    var oT=trx.filter(function(t){return t.outlet_id===o.id;});
+    var oK=kel.filter(function(k){return k.outlet_id===o.id;});
+    return{
+      nama:o.nama, id:o.id,
+      omset:oT.reduce(function(s,t){return s+t.total;},0),
+      gross:oT.reduce(function(s,t){return s+t.gross_profit;},0),
+      keluar:oK.reduce(function(s,k){return s+k.nominal;},0),
+      trxCount:oT.length,
+      isOpen:opens.some(function(x){return x.outlet_id===o.id;}),
+      isClosed:closes.some(function(x){return x.outlet_id===o.id;})
+    };
+  });
+
+  var menuMap={};
+  det.forEach(function(item){
+    if(!menuMap[item.nama_menu])menuMap[item.nama_menu]={qty:0,rev:0,gross:0,kat:item.kategori||'-'};
+    menuMap[item.nama_menu].qty+=item.qty||0;
+    menuMap[item.nama_menu].rev+=item.subtotal||0;
+    menuMap[item.nama_menu].gross+=item.gross_profit||0;
+  });
+  var topMenu=Object.entries(menuMap).sort(function(a,b){return b[1].qty-a[1].qty;}).slice(0,5).map(function(e){return{nama:e[0],qty:e[1].qty,rev:e[1].rev,gross:e[1].gross,margin:e[1].rev>0?Math.round(e[1].gross/e[1].rev*100):0};});
+  var lowMarginMenu=Object.entries(menuMap).filter(function(e){return e[1].qty>3&&(e[1].rev>0?e[1].gross/e[1].rev:0)<0.2;}).map(function(e){return{nama:e[0],margin:e[1].rev>0?Math.round(e[1].gross/e[1].rev*100):0,qty:e[1].qty};});
+
+  var period_label=PERIODS.find(function(p){return p.id===period;}).l;
+
+  var dataContext = [
+    'Data bisnis Teras Nyai (kedai es teler & makanan, 6 outlet di area Jabodetabek)',
+    'Periode analisis: '+period_label,
+    '',
+    'RINGKASAN KEUANGAN:',
+    '- Total omset: Rp '+Math.round(omset).toLocaleString('id-ID'),
+    '- Gross profit: Rp '+Math.round(gross).toLocaleString('id-ID')+' (margin '+margin+'%)',
+    '- Total HPP: Rp '+Math.round(hpp).toLocaleString('id-ID'),
+    '- Total pengeluaran operasional: Rp '+Math.round(keluar).toLocaleString('id-ID'),
+    '- Net profit: Rp '+Math.round(net).toLocaleString('id-ID'),
+    '- Total transaksi: '+trx.length,
+    '- Rata-rata per transaksi: Rp '+Math.round(trx.length?omset/trx.length:0).toLocaleString('id-ID'),
+    '',
+    'PERFORMA PER OUTLET:',
+    outletData.map(function(o){return'- '+o.nama+': omset Rp '+Math.round(o.omset).toLocaleString('id-ID')+', gross Rp '+Math.round(o.gross).toLocaleString('id-ID')+', '+o.trxCount+' trx, status: '+(o.isClosed?'sudah tutup':o.isOpen?'buka':'belum buka');}).join('\n'),
+    '',
+    'MENU TERLARIS (TOP 5):',
+    topMenu.map(function(m){return'- '+m.nama+': '+m.qty+' pcs, omset Rp '+Math.round(m.rev).toLocaleString('id-ID')+', margin '+m.margin+'%';}).join('\n'),
+    '',
+    'MENU MARGIN RENDAH (<20%):',
+    lowMarginMenu.length>0?lowMarginMenu.map(function(m){return'- '+m.nama+': margin '+m.margin+'%, '+m.qty+' terjual';}).join('\n'):'Tidak ada',
+    '',
+    'PENGELUARAN TERBESAR:',
+    kel.slice(0,5).map(function(k){return'- '+k.nama_akun+': Rp '+Math.round(k.nominal).toLocaleString('id-ID');}).join('\n')
+  ].join('\n');
+
+  var prompt = 'Kamu adalah konsultan bisnis F&B berpengalaman yang menganalisis data POS real-time bisnis kedai es teler dan makanan "Teras Nyai" yang memiliki 6 outlet.\n\n'+dataContext+'\n\nBerikan analisis bisnis yang konkret, actionable, dan spesifik berdasarkan data di atas. Format respons dalam bagian-bagian berikut (gunakan markdown bold **teks** untuk penekanan):\n\n1. **KONDISI BISNIS SAAT INI** - evaluasi singkat performa keseluruhan\n2. **YANG BERJALAN BAIK** - 2-3 hal positif spesifik dari data\n3. **PERHATIAN SEGERA** - 2-3 hal yang perlu ditindaklanjuti owner hari ini\n4. **REKOMENDASI STRATEGI** - 3 rekomendasi konkret untuk meningkatkan revenue/profit\n5. **OUTLET FOCUS** - outlet mana yang butuh perhatian dan kenapa\n\nGunakan bahasa Indonesia yang natural, langsung ke poin, tidak bertele-tele. Maksimal 300 kata total.';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': '', // Akan diisi
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 800,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  }).then(function(r){ return r.json(); })
+  .then(function(res){
+    var text = res.content && res.content[0] ? res.content[0].text : null;
+    if(!text || res.error) {
+      // Jika API tidak tersedia, tampilkan analisis berbasis rule
+      showRuleBasedAnalysis(omset, gross, keluar, net, margin, outletData, topMenu, lowMarginMenu, trx.length);
+      return;
+    }
+    renderAIText(text);
+  })
+  .catch(function(){
+    showRuleBasedAnalysis(omset, gross, keluar, net, margin, outletData, topMenu, lowMarginMenu, trx.length);
+  });
+}
+
+function showRuleBasedAnalysis(omset, gross, keluar, net, margin, outletData, topMenu, lowMarginMenu, trxCount){
+  var margin_n = parseFloat(margin);
+  var outletTerbaik = outletData.filter(function(o){return o.omset>0;}).sort(function(a,b){return b.omset-a.omset;})[0];
+  var outletSepi = outletData.filter(function(o){return o.isOpen;}).sort(function(a,b){return a.omset-b.omset;})[0];
+  var outletBelumBuka = outletData.filter(function(o){return !o.isOpen&&!o.isClosed;});
+
+  var items = [];
+  var warnings = [];
+  var goods = [];
+  var recs = [];
+
+  // Kondisi
+  if(net<0) items.push({type:'bad',text:'Net profit negatif (Rp '+Math.round(Math.abs(net)).toLocaleString('id-ID')+'). Pengeluaran melebihi gross profit — perlu audit pengeluaran segera.'});
+  else if(margin_n<25) items.push({type:'warn',text:'Gross margin '+margin_n+'% masih di bawah standar F&B (idealnya >30%). Review HPP menu-menu utama.'});
+  else items.push({type:'good',text:'Gross margin '+margin_n+'% dalam kondisi sehat. Bisnis berjalan dengan baik.'});
+
+  // Yang baik
+  if(outletTerbaik&&outletTerbaik.omset>0) goods.push('Outlet terbaik: '+outletTerbaik.nama+' dengan omset '+('Rp '+Math.round(outletTerbaik.omset).toLocaleString('id-ID'))+'. Pelajari praktik baik outlet ini untuk diterapkan di outlet lain.');
+  if(topMenu.length>0) goods.push('Menu '+topMenu[0].nama+' menjadi andalan dengan '+topMenu[0].qty+' pcs terjual. Pastikan stok selalu terjaga dan kualitas konsisten.');
+  if(trxCount>0) goods.push(trxCount+' transaksi berhasil diproses. Sistem POS berjalan dengan lancar di semua outlet aktif.');
+
+  // Perhatian
+  if(outletBelumBuka.length>0) warnings.push(outletBelumBuka.length+' outlet belum buka ('+outletBelumBuka.map(function(o){return o.nama;}).join(', ')+'). Cek kondisi di lapangan.');
+  if(lowMarginMenu.length>0) warnings.push(lowMarginMenu.length+' menu memiliki margin <20% ('+lowMarginMenu.slice(0,2).map(function(m){return m.nama;}).join(', ')+'). Review harga jual atau HPP.');
+  if(keluar>gross*0.3) warnings.push('Total pengeluaran operasional mencapai '+Math.round(keluar/gross*100)+'% dari gross profit. Identifikasi pengeluaran yang bisa dioptimasi.');
+
+  // Rekomendasi
+  if(outletSepi&&outletSepi.omset<outletTerbaik.omset*0.5) recs.push('Fokus perhatian ke '+outletSepi.nama+' yang performanya jauh di bawah rata-rata. Evaluasi lokasi, promosi, atau operasional.');
+  recs.push('Tingkatkan penjualan menu margin tinggi (>40%) untuk mendongkrak profitabilitas. Latih kasir untuk menawarkan item tersebut.');
+  recs.push('Implementasi program loyalitas atau bundling produk untuk meningkatkan nilai per transaksi dari rata-rata saat ini.');
+
+  var html='';
+  html+='<div class="ai-section"><div class="ai-section-title">📊 Kondisi Bisnis Saat Ini</div>';
+  items.forEach(function(i){html+='<div class="ai-item '+i.type+'">'+i.text+'</div>';});
+  html+='</div>';
+
+  html+='<div class="ai-section"><div class="ai-section-title">✅ Yang Berjalan Baik</div>';
+  goods.forEach(function(g){html+='<div class="ai-item good">'+g+'</div>';});
+  html+='</div>';
+
+  if(warnings.length>0){
+    html+='<div class="ai-section"><div class="ai-section-title">⚠️ Perhatian Segera</div>';
+    warnings.forEach(function(w){html+='<div class="ai-item warn">'+w+'</div>';});
+    html+='</div>';
+  }
+
+  html+='<div class="ai-section"><div class="ai-section-title">🚀 Rekomendasi Strategi</div>';
+  recs.forEach(function(r,i){html+='<div class="ai-item">'+(i+1)+'. '+r+'</div>';});
+  html+='</div>';
+
+  document.getElementById('ai-content').innerHTML='<div class="ai-body">'+html+'</div>';
+}
+
+function renderAIText(text){
+  // Parse markdown bold dan list ke HTML
+  var html=text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/\n-\s/g,'<br>• ')
+    .replace(/\n\d+\.\s/g,function(m){return'<br>'+m.trim()+' ';});
+  document.getElementById('ai-content').innerHTML='<div class="ai-body"><p>'+html+'</p></div>';
+}
+
+function refreshAnalisis(){
+  if(cachedData){
+    document.getElementById('ai-content').innerHTML='<div class="ai-loading">Menganalisis ulang<span class="ai-loading-dot">...</span></div>';
+    loadAIAnalysis(cachedData);
+  }
+}
+
+// ── CHART RENDERERS ───────────────────────────────────────────
+function renderHourChart(id, todayTrx, ydayTrx){
+  var hours=[];for(var h=6;h<=23;h++)hours.push(h);
+  function agg(list){
+    var a={};hours.forEach(function(h){a[h]=0;});
+    list.forEach(function(t){var h=parseInt((t.jam||'00:00').slice(0,2));if(a[h]!==undefined)a[h]+=t.total;});
+    return hours.map(function(h){return a[h];});
+  }
+  var ctx=document.getElementById(id);if(!ctx)return;
+  if(charts[id]){charts[id].destroy();}
+  charts[id]=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:hours.map(function(h){return h+'.00';}),
+      datasets:[
+        {label:'Hari Ini',data:agg(todayTrx),backgroundColor:'rgba(245,158,11,0.7)',borderColor:'#f59e0b',borderWidth:1,borderRadius:3},
+        {label:'Kemarin',data:agg(ydayTrx),backgroundColor:'rgba(60,60,60,0.5)',borderColor:'#444',borderWidth:1,borderRadius:3}
       ]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              return ctx.dataset.label + ': Rp ' + Math.round(ctx.raw||0).toLocaleString('id-ID');
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color:'#555', font:{size:9}, maxRotation:0 },
-          grid: { color:'rgba(255,255,255,0.03)' }
-        },
-        y: {
-          ticks: {
-            color:'#555', font:{size:9},
-            callback: function(v) {
-              if(v>=1000000) return (v/1000000).toFixed(1)+'jt';
-              if(v>=1000) return (v/1000).toFixed(0)+'rb';
-              return v;
-            }
-          },
-          grid: { color:'rgba(255,255,255,0.05)' }
-        }
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+fmtS(c.raw||0);}}}},
+      scales:{
+        x:{ticks:{color:'#555',font:{size:9},maxRotation:0},grid:{color:'rgba(255,255,255,0.03)'}},
+        y:{ticks:{color:'#555',font:{size:9},callback:function(v){return fmtS(v);}},grid:{color:'rgba(255,255,255,0.05)'}}
       }
     }
   });
 }
 
-// ── HELPERS ───────────────────────────────────────────────────
-function sumCard(label, val, sub, color, delta) {
-  return '<div class="sum-card">' +
-    '<div class="sum-label">'+label+'</div>' +
-    '<div class="sum-val" style="color:'+color+'">'+val+'</div>' +
-    '<div class="sum-sub">'+sub+(delta?' '+delta:'')+'</div>' +
-    '</div>';
+function renderKatChart(id,kats){
+  var ctx=document.getElementById(id);if(!ctx)return;
+  if(charts[id]){charts[id].destroy();}
+  var colors=['rgba(245,158,11,0.7)','rgba(16,185,129,0.7)','rgba(59,130,246,0.7)','rgba(139,92,246,0.7)','rgba(239,68,68,0.7)','rgba(248,113,113,0.7)'];
+  charts[id]=new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:kats.map(function(k){return k.kat;}),
+      datasets:[{data:kats.map(function(k){return k.rev;}),backgroundColor:colors,borderColor:'#1a1a1a',borderWidth:2}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#888',font:{size:10},padding:8}},
+        tooltip:{callbacks:{label:function(c){return c.label+': '+fmtS(c.raw||0);}}}
+      }
+    }
+  });
 }
 
-function detBox(label, val, color) {
-  return '<div class="detail-box">' +
-    '<div class="detail-label">'+label+'</div>' +
-    '<div class="detail-val" style="color:'+color+'">'+val+'</div>' +
-    '</div>';
+// ── HELPERS RENDER ────────────────────────────────────────────
+function sc(label,val,sub,color){return'<div class="scard"><div class="slabel">'+label+'</div><div class="sval" style="color:'+color+'">'+val+'</div><div class="ssub">'+sub+'</div></div>';}
+function mb(l,v,c){return'<div class="met-box"><div class="met-label">'+l+'</div><div class="met-val" style="color:'+c+'">'+v+'</div></div>';}
+function mr(l,v,plain){return'<div class="mrow"><span class="l">'+l+'</span><span style="font-family:var(--mono);color:'+(plain?'var(--tx2)':'var(--tx)')+'">'+v+'</span></div>';}
+function plRow(label,val,color,bold,big){
+  var style='display:flex;justify-content:space-between;align-items:center;padding:'+(big?'10px':'6px')+' 0;border-bottom:1px solid var(--b);font-size:'+(big?'15px':'13px')+(bold?';font-weight:700':'');
+  return'<div style="'+style+'"><span style="color:var(--tx2)">'+label+'</span><span style="font-family:var(--mono);color:'+color+'">'+fmt(val)+'</span></div>';
 }
-
-function mRow(label, val, num, color) {
-  var disp = num !== undefined ? fmt(num) : val;
-  var clr  = color || (num > 0 ? 'var(--tx)' : 'var(--tx3)');
-  return '<div class="metode-row">' +
-    '<span style="color:var(--tx2)">'+label+'</span>' +
-    '<span style="color:'+clr+'">'+disp+'</span>' +
-    '</div>';
-}
-
-function toggleEx(id) {
-  expanded[id] = !expanded[id];
-  var dp = document.getElementById('dp-'+id);
-  if(dp) dp.classList.toggle('show', expanded[id]);
-}
+function metBox(l,v,c){return'<div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;margin-bottom:4px">'+l+'</div><div style="font-size:15px;font-weight:700;font-family:var(--mono);color:'+c+'">'+v+'</div></div>';}
+function toggleEx(id){expanded[id]=!expanded[id];var dp=document.getElementById('dp-'+id);if(dp)dp.classList.toggle('open',expanded[id]);else{var ob=document.querySelector('#oc-'+id);if(ob)ob.classList.toggle('open',expanded[id]);}}
 
 // ── INIT ──────────────────────────────────────────────────────
-if (!authed) renderLogin();
-else { renderShell(); loadData(); }
+if(!authed)renderLogin();
+else{renderShell();loadData();}
 </script>
 </body>
 </html>
