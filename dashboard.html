@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0a">
+<title>Dashboard Owner — Teras Nyai</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a;--bg1:#111;--bg2:#1a1a1a;--bg3:#222;
+  --b:#2a2a2a;--b2:#333;
+  --tx:#f0ece4;--tx2:#888;--tx3:#444;
+  --am:#f59e0b;--am2:#d97706;--amd:rgba(245,158,11,.1);
+  --gn:#10b981;--gnd:rgba(16,185,129,.1);
+  --rd:#ef4444;--rdd:rgba(239,68,68,.1);
+  --bl:#3b82f6;--bld:rgba(59,130,246,.1);
+  --font:'Plus Jakarta Sans',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--tx);font-family:var(--font);min-height:100dvh}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* TOPBAR */
+.topbar{background:var(--bg1);border-bottom:1px solid var(--b);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.brand{font-size:16px;font-weight:800;color:var(--am);letter-spacing:-.02em}
+.brand span{color:var(--tx);font-weight:300}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.date-badge{font-size:11px;color:var(--tx2);font-family:var(--mono)}
+.refresh-btn{background:var(--bg3);border:1px solid var(--b2);border-radius:8px;color:var(--tx2);font-size:12px;padding:6px 12px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px;transition:all .15s}
+.refresh-btn:active{border-color:var(--am);color:var(--am)}
+
+/* LOGIN */
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:24px;gap:16px}
+.login-card{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:28px 24px;width:100%;max-width:340px}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo h1{font-size:22px;font-weight:800;color:var(--am)}
+.login-logo p{font-size:12px;color:var(--tx2);font-family:var(--mono);margin-top:4px}
+.form-label{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);display:block;margin-bottom:6px}
+.form-input{width:100%;background:var(--bg3);border:1.5px solid var(--b2);border-radius:8px;color:var(--tx);font-family:var(--font);font-size:14px;padding:11px 13px;outline:none;transition:border-color .2s;margin-bottom:14px}
+.form-input:focus{border-color:var(--am)}
+.btn-login{width:100%;background:var(--am);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:700;padding:13px;cursor:pointer;font-family:var(--font)}
+.btn-login:active{background:var(--am2)}
+.err{color:var(--rd);font-size:12px;font-family:var(--mono);margin-bottom:10px;text-align:center}
+
+/* CONTENT */
+.content{padding:14px;max-width:480px;margin:0 auto;padding-bottom:24px}
+
+/* SUMMARY STRIP */
+.summary-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.sum-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:12px}
+.sum-label{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:4px}
+.sum-val{font-size:18px;font-weight:700;font-family:var(--mono);line-height:1.2}
+.sum-sub{font-size:10px;color:var(--tx2);margin-top:3px}
+
+/* SECTION */
+.section-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:8px;padding-left:2px}
+
+/* OUTLET CARDS */
+.outlet-card{background:var(--bg2);border:1px solid var(--b);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.outlet-card.open{border-color:rgba(16,185,129,.3)}
+.outlet-card.closed{border-color:rgba(239,68,68,.2)}
+.outlet-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.outlet-name{font-size:15px;font-weight:700}
+.outlet-id{font-size:10px;color:var(--tx3);font-family:var(--mono);margin-top:2px}
+.outlet-status{display:flex;align-items:center;gap:6px}
+.status-dot{width:7px;height:7px;border-radius:50%}
+.status-dot.open{background:var(--gn)}
+.status-dot.closed{background:var(--rd)}
+.status-dot.idle{background:var(--tx3)}
+.status-text{font-size:11px;font-family:var(--mono);color:var(--tx2)}
+.outlet-omset{font-size:18px;font-weight:700;color:var(--am);font-family:var(--mono);text-align:right}
+.outlet-trx{font-size:11px;color:var(--tx2);font-family:var(--mono);text-align:right}
+
+.outlet-body{padding:0 14px 14px;border-top:1px solid var(--b);display:none}
+.outlet-body.show{display:block;padding-top:12px}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.metric{background:var(--bg3);border-radius:8px;padding:10px 12px}
+.metric-label{font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.metric-val{font-size:15px;font-weight:700;font-family:var(--mono)}
+.metode-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid var(--b);font-family:var(--mono)}
+.metode-row:last-child{border-bottom:none}
+.metode-row .l{color:var(--tx2)}
+
+/* SOP STATUS */
+.sop-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid var(--b)}
+.sop-row:last-child{border-bottom:none}
+.sop-badge{font-size:10px;font-weight:600;font-family:var(--mono);padding:2px 7px;border-radius:10px}
+.sop-badge.done{background:var(--gnd);color:var(--gn)}
+.sop-badge.missing{background:var(--rdd);color:var(--rd)}
+.sop-badge.idle{background:var(--bg3);color:var(--tx3)}
+
+/* LOADING */
+.loading{text-align:center;padding:48px 20px}
+.loading-icon{font-size:32px;margin-bottom:12px;animation:spin 1.5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:12px;color:var(--tx2);font-family:var(--mono)}
+
+/* EMPTY */
+.empty{text-align:center;padding:32px;color:var(--tx3);font-size:12px;font-family:var(--mono)}
+
+/* LAST UPDATE */
+.last-update{text-align:center;font-size:11px;color:var(--tx3);font-family:var(--mono);padding:8px 0 4px}
+
+/* PENGELUARAN LIST */
+.keluar-item{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid var(--b)}
+.keluar-item:last-child{border-bottom:none}
+.keluar-item .l{color:var(--tx2);font-size:11px}
+.keluar-item .v{font-family:var(--mono);color:var(--rd);font-weight:600}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+var SUPA_URL = 'https://xaixkcaeufxesqmdzhuv.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhaXhrY2FldWZ4ZXNxbWR6aHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5Njc1NzUsImV4cCI6MjA5NDU0MzU3NX0.nrFYxWfn8kA1JV6wyiW1X6KVRxKJi6yBnMPAGVIPTjY';
+var OWNER_PIN = '1111'; // PIN owner untuk akses dashboard
+
+var OUTLETS = [
+  {id:'OTL-A', nama:'Kedai Mencong'},
+  {id:'OTL-B', nama:'Kedai Tanser'},
+  {id:'OTL-C', nama:'Kedai Swadaya'},
+  {id:'OTL-D', nama:'Kedai Inpres'},
+  {id:'OTL-E', nama:'Kedai Kacang'},
+  {id:'OTL-F', nama:'Tekel 1'}
+];
+
+var expanded = {};
+var lastData = null;
+var autoRefreshInterval = null;
+
+// ── AUTH ──────────────────────────────────────────────────────
+var authed = localStorage.getItem('dashboard_auth') === '1';
+
+function render() {
+  if (!authed) { renderLogin(); return; }
+  renderShell();
+  loadData();
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────
+function renderLogin() {
+  document.getElementById('app').innerHTML =
+    '<div class="login-wrap">' +
+    '<div class="login-card">' +
+    '<div class="login-logo"><h1>☕ Teras Nyai</h1><p>Owner Dashboard</p></div>' +
+    '<label class="form-label">PIN Owner</label>' +
+    '<input class="form-input" type="password" id="pin-input" placeholder="Masukkan PIN" inputmode="numeric" maxlength="4">' +
+    '<div class="err" id="pin-err" style="display:none">PIN salah</div>' +
+    '<button class="btn-login" onclick="doLogin()">Masuk</button>' +
+    '</div></div>';
+  document.getElementById('pin-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+  setTimeout(function(){ document.getElementById('pin-input').focus(); }, 100);
+}
+
+function doLogin() {
+  var pin = document.getElementById('pin-input').value;
+  if (pin === OWNER_PIN) {
+    localStorage.setItem('dashboard_auth', '1');
+    authed = true;
+    render();
+  } else {
+    document.getElementById('pin-err').style.display = 'block';
+    document.getElementById('pin-input').value = '';
+  }
+}
+
+// ── SHELL ─────────────────────────────────────────────────────
+function renderShell() {
+  var today = new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('app').innerHTML =
+    '<div class="topbar">' +
+    '<div><div class="brand">Teras <span>Nyai</span></div><div style="font-size:10px;color:var(--tx3);font-family:var(--mono)">' + today + '</div></div>' +
+    '<div class="topbar-right">' +
+    '<span class="live-dot"></span>' +
+    '<button class="refresh-btn" onclick="loadData()">↻ Refresh</button>' +
+    '<button class="refresh-btn" onclick="doLogout()" style="color:var(--rd)">Keluar</button>' +
+    '</div></div>' +
+    '<div class="content" id="content"><div class="loading"><div class="loading-icon">⏳</div><div class="loading-text">Memuat data hari ini...</div></div></div>';
+}
+
+function doLogout() {
+  localStorage.removeItem('dashboard_auth');
+  authed = false;
+  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+  render();
+}
+
+// ── DATA FETCH ────────────────────────────────────────────────
+function supaGet(table, filter) {
+  var url = SUPA_URL + '/rest/v1/' + table + '?' + filter;
+  return fetch(url, {
+    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
+  }).then(function(r) { return r.json(); });
+}
+
+function fmt(n) { return 'Rp ' + Math.round(n||0).toLocaleString('id-ID'); }
+function fmtShort(n) {
+  n = Math.round(n||0);
+  if (n >= 1000000) return 'Rp ' + (n/1000000).toFixed(1) + 'jt';
+  if (n >= 1000) return 'Rp ' + (n/1000).toFixed(0) + 'rb';
+  return 'Rp ' + n;
+}
+
+function loadData() {
+  var tgl = new Date().toISOString().slice(0,10);
+  document.getElementById('content').innerHTML =
+    '<div class="loading"><div class="loading-icon">⏳</div><div class="loading-text">Memuat data...</div></div>';
+
+  Promise.all([
+    supaGet('transaksi', 'tgl=eq.' + tgl + '&status=eq.LUNAS&select=outlet_id,total,hpp_total,gross_profit,metode_bayar'),
+    supaGet('pengeluaran', 'tgl=eq.' + tgl + '&select=outlet_id,nominal,nama_akun'),
+    supaGet('sop_opening', 'tgl=eq.' + tgl + '&select=outlet_id,nama_crew,submitted_at'),
+    supaGet('sop_closing', 'tgl=eq.' + tgl + '&select=outlet_id,nama_crew,submitted_at'),
+    supaGet('absensi', 'tgl=eq.' + tgl + '&tipe=eq.MASUK&select=outlet_id,emp_nama,jam')
+  ]).then(function(results) {
+    var trxAll    = results[0] || [];
+    var kelAll    = results[1] || [];
+    var openAll   = results[2] || [];
+    var closeAll  = results[3] || [];
+    var absenAll  = results[4] || [];
+    renderDashboard(tgl, trxAll, kelAll, openAll, closeAll, absenAll);
+  }).catch(function(e) {
+    document.getElementById('content').innerHTML =
+      '<div class="empty">⚠️ Gagal memuat data<br>' + e.message + '</div>';
+  });
+}
+
+// ── RENDER DASHBOARD ──────────────────────────────────────────
+function renderDashboard(tgl, trxAll, kelAll, openAll, closeAll, absenAll) {
+  // Hitung total semua outlet
+  var totalOmset = trxAll.reduce(function(s,t){ return s+t.total; }, 0);
+  var totalTrx   = trxAll.length;
+  var totalKeluar= kelAll.reduce(function(s,k){ return s+k.nominal; }, 0);
+  var totalGross = trxAll.reduce(function(s,t){ return s+t.gross_profit; }, 0);
+  var outletBuka = openAll.filter(function(o,i,a){
+    return a.findIndex(function(x){ return x.outlet_id===o.outlet_id; }) === i;
+  }).length;
+
+  var now = new Date().toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+
+  var html = '';
+
+  // ── SUMMARY STRIP ──
+  html += '<div class="summary-strip">';
+  html += sumCard('Total Omset', fmtShort(totalOmset), totalTrx + ' trx', 'var(--am)');
+  html += sumCard('Gross Profit', fmtShort(totalGross), Math.round(totalGross/Math.max(totalOmset,1)*100) + '% margin', 'var(--gn)');
+  html += sumCard('Pengeluaran', fmtShort(totalKeluar), 'Net: ' + fmtShort(totalGross-totalKeluar), 'var(--rd)');
+  html += '</div>';
+
+  // ── STATUS BARIS ──
+  html += '<div style="background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">';
+  html += '<div style="font-size:12px;color:var(--tx2)">Outlet aktif hari ini</div>';
+  html += '<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gn)">' + outletBuka + ' / ' + OUTLETS.length + '</div>';
+  html += '</div>';
+
+  // ── OUTLET CARDS ──
+  html += '<div class="section-title">Semua Outlet</div>';
+
+  OUTLETS.forEach(function(outlet) {
+    var trx     = trxAll.filter(function(t){ return t.outlet_id === outlet.id; });
+    var kel     = kelAll.filter(function(k){ return k.outlet_id === outlet.id; });
+    var opens   = openAll.filter(function(o){ return o.outlet_id === outlet.id; });
+    var closes  = closeAll.filter(function(c){ return c.outlet_id === outlet.id; });
+    var absen   = absenAll.filter(function(a){ return a.outlet_id === outlet.id; });
+
+    var omset   = trx.reduce(function(s,t){ return s+t.total; }, 0);
+    var gross   = trx.reduce(function(s,t){ return s+t.gross_profit; }, 0);
+    var hpp     = trx.reduce(function(s,t){ return s+t.hpp_total; }, 0);
+    var keluar  = kel.reduce(function(s,k){ return s+k.nominal; }, 0);
+
+    var isOpen    = opens.length > 0;
+    var isClosed  = closes.length > 0;
+    var statusCls = isClosed ? 'closed' : isOpen ? 'open' : 'idle';
+    var statusTxt = isClosed ? 'Sudah Tutup' : isOpen ? 'Buka' : 'Belum Buka';
+    var isExpanded= expanded[outlet.id] || false;
+
+    // Metode bayar
+    var tunai    = trx.filter(function(t){ return t.metode_bayar==='TUNAI'; }).reduce(function(s,t){ return s+t.total; }, 0);
+    var qris     = trx.filter(function(t){ return t.metode_bayar==='QRIS'; }).reduce(function(s,t){ return s+t.total; }, 0);
+    var transfer = trx.filter(function(t){ return t.metode_bayar==='TRANSFER'; }).reduce(function(s,t){ return s+t.total; }, 0);
+
+    html += '<div class="outlet-card ' + statusCls + '" id="card-' + outlet.id + '">';
+
+    // Header
+    html += '<div class="outlet-head" onclick="toggleExpand(\'' + outlet.id + '\')">';
+    html += '<div>';
+    html += '<div class="outlet-name">' + outlet.nama + '</div>';
+    html += '<div style="display:flex;align-items:center;gap:6px;margin-top:3px">';
+    html += '<span class="status-dot ' + statusCls + '"></span>';
+    html += '<span class="status-text">' + statusTxt + '</span>';
+    if (absen.length > 0) {
+      html += '<span style="font-size:10px;color:var(--tx3);font-family:var(--mono)">· ' + absen.length + ' crew</span>';
+    }
+    html += '</div></div>';
+    html += '<div style="text-align:right">';
+    html += '<div class="outlet-omset">' + fmtShort(omset) + '</div>';
+    html += '<div class="outlet-trx">' + trx.length + ' trx · ' + (isExpanded ? '▲' : '▼') + '</div>';
+    html += '</div>';
+    html += '</div>';
+
+    // Body (expandable)
+    html += '<div class="outlet-body' + (isExpanded ? ' show' : '') + '" id="body-' + outlet.id + '">';
+
+    // Metrics
+    html += '<div class="metric-grid">';
+    html += metric('Gross Profit', fmtShort(gross), gross >= 0 ? 'var(--gn)' : 'var(--rd)');
+    html += metric('HPP', fmtShort(hpp), 'var(--tx2)');
+    html += metric('Pengeluaran', fmtShort(keluar), 'var(--rd)');
+    html += metric('Net', fmtShort(gross - keluar), (gross-keluar) >= 0 ? 'var(--gn)' : 'var(--rd)');
+    html += '</div>';
+
+    // Metode bayar
+    html += '<div style="margin-bottom:10px">';
+    html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Metode Bayar</div>';
+    html += metodeRow('Tunai', tunai);
+    html += metodeRow('QRIS', qris);
+    html += metodeRow('Transfer', transfer);
+    html += '</div>';
+
+    // SOP Status
+    html += '<div>';
+    html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Status SOP</div>';
+    html += sopRow('Opening', opens.length > 0, opens.length > 0 ? opens[0].nama_crew + ' ' + new Date(opens[0].submitted_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-');
+    html += sopRow('Closing', closes.length > 0, closes.length > 0 ? closes[0].nama_crew + ' ' + new Date(closes[0].submitted_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-');
+    html += '</div>';
+
+    // Crew hadir
+    if (absen.length > 0) {
+      html += '<div style="margin-top:10px">';
+      html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Crew Hadir</div>';
+      absen.forEach(function(a) {
+        html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--b)">';
+        html += '<span>' + a.emp_nama + '</span>';
+        html += '<span style="font-family:var(--mono);color:var(--tx2)">' + (a.jam||'').slice(0,5) + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Pengeluaran
+    if (kel.length > 0) {
+      html += '<div style="margin-top:10px">';
+      html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Pengeluaran</div>';
+      kel.forEach(function(k) {
+        html += '<div class="keluar-item"><span class="l">' + (k.nama_akun||'-') + '</span><span class="v">' + fmt(k.nominal) + '</span></div>';
+      });
+      html += '</div>';
+    }
+
+    html += '</div>'; // end body
+    html += '</div>'; // end card
+  });
+
+  html += '<div class="last-update">Terakhir diperbarui: ' + now + ' · Tap outlet untuk detail</div>';
+
+  document.getElementById('content').innerHTML = html;
+
+  // Auto refresh tiap 60 detik
+  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+  autoRefreshInterval = setInterval(loadData, 60000);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function sumCard(label, val, sub, color) {
+  return '<div class="sum-card">' +
+    '<div class="sum-label">' + label + '</div>' +
+    '<div class="sum-val" style="color:' + color + '">' + val + '</div>' +
+    '<div class="sum-sub">' + sub + '</div>' +
+    '</div>';
+}
+
+function metric(label, val, color) {
+  return '<div class="metric">' +
+    '<div class="metric-label">' + label + '</div>' +
+    '<div class="metric-val" style="color:' + color + '">' + val + '</div>' +
+    '</div>';
+}
+
+function metodeRow(label, val) {
+  return '<div class="metode-row"><span class="l">' + label + '</span><span style="font-family:var(--mono);font-weight:' + (val>0?'600':'400') + ';color:' + (val>0?'var(--tx)':'var(--tx3)') + '">' + fmt(val) + '</span></div>';
+}
+
+function sopRow(label, done, info) {
+  return '<div class="sop-row">' +
+    '<span style="color:var(--tx2)">' + label + '</span>' +
+    '<div style="display:flex;align-items:center;gap:8px">' +
+    '<span style="font-size:11px;color:var(--tx3);font-family:var(--mono)">' + info + '</span>' +
+    '<span class="sop-badge ' + (done?'done':'missing') + '">' + (done?'✓ Ada':'✗ Belum') + '</span>' +
+    '</div></div>';
+}
+
+function toggleExpand(outletId) {
+  expanded[outletId] = !expanded[outletId];
+  var body = document.getElementById('body-' + outletId);
+  var card = document.getElementById('card-' + outletId);
+  if (body) body.classList.toggle('show', expanded[outletId]);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
