@@ -9,405 +9,556 @@
 <title>Dashboard Owner — Teras Nyai</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0a0a;--bg1:#111;--bg2:#1a1a1a;--bg3:#222;
-  --b:#2a2a2a;--b2:#333;
-  --tx:#f0ece4;--tx2:#888;--tx3:#444;
-  --am:#f59e0b;--am2:#d97706;--amd:rgba(245,158,11,.1);
-  --gn:#10b981;--gnd:rgba(16,185,129,.1);
-  --rd:#ef4444;--rdd:rgba(239,68,68,.1);
-  --bl:#3b82f6;--bld:rgba(59,130,246,.1);
-  --font:'Plus Jakarta Sans',sans-serif;
-  --mono:'JetBrains Mono',monospace;
-}
+:root{--bg:#0a0a0a;--bg1:#111;--bg2:#1a1a1a;--bg3:#222;--b:#2a2a2a;--b2:#333;--tx:#f0ece4;--tx2:#888;--tx3:#444;--am:#f59e0b;--am2:#d97706;--amd:rgba(245,158,11,.12);--gn:#10b981;--gnd:rgba(16,185,129,.12);--rd:#ef4444;--rdd:rgba(239,68,68,.1);--bl:#3b82f6;--bld:rgba(59,130,246,.12);--font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--tx);font-family:var(--font);min-height:100dvh}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
-
-/* TOPBAR */
-.topbar{background:var(--bg1);border-bottom:1px solid var(--b);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-.brand{font-size:16px;font-weight:800;color:var(--am);letter-spacing:-.02em}
+.topbar{background:var(--bg1);border-bottom:1px solid var(--b);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-shrink:0}
+.brand{font-size:16px;font-weight:800;color:var(--am)}
 .brand span{color:var(--tx);font-weight:300}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.live-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-.date-badge{font-size:11px;color:var(--tx2);font-family:var(--mono)}
-.refresh-btn{background:var(--bg3);border:1px solid var(--b2);border-radius:8px;color:var(--tx2);font-size:12px;padding:6px 12px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px;transition:all .15s}
-.refresh-btn:active{border-color:var(--am);color:var(--am)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--gn);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.btn-sm{background:var(--bg3);border:1px solid var(--b2);border-radius:8px;color:var(--tx2);font-size:11px;padding:6px 10px;cursor:pointer;font-family:var(--font);transition:all .15s}
+.btn-sm:active{border-color:var(--am);color:var(--am)}
+.btn-danger{border-color:var(--rd);color:var(--rd)}
+
+/* PERIOD TABS */
+.period-wrap{overflow-x:auto;display:flex;gap:6px;padding:10px 14px;background:var(--bg1);border-bottom:1px solid var(--b);scrollbar-width:none;flex-shrink:0}
+.period-wrap::-webkit-scrollbar{display:none}
+.period-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:var(--mono);cursor:pointer;border:1.5px solid var(--b2);color:var(--tx2);white-space:nowrap;transition:all .15s;background:none}
+.period-tab.active{background:var(--amd);border-color:var(--am);color:var(--am)}
+
+/* CONTENT */
+.content{padding:12px 14px;max-width:520px;margin:0 auto;padding-bottom:32px}
+
+/* SUMMARY CARDS */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.sum-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:13px}
+.sum-card.full{grid-column:1/-1}
+.sum-label{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:5px}
+.sum-val{font-size:22px;font-weight:700;font-family:var(--mono);line-height:1.1}
+.sum-sub{font-size:11px;color:var(--tx2);margin-top:4px;display:flex;align-items:center;gap:4px}
+.delta{font-size:10px;font-weight:600;font-family:var(--mono);padding:2px 6px;border-radius:6px}
+.delta.up{background:var(--gnd);color:var(--gn)}
+.delta.down{background:var(--rdd);color:var(--rd)}
+.delta.flat{background:var(--bg3);color:var(--tx3)}
+
+/* CHART */
+.chart-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:13px;margin-bottom:14px}
+.chart-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.chart-legend{display:flex;gap:12px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--tx2);font-family:var(--mono)}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+.chart-wrap{position:relative;height:160px}
+canvas{width:100%!important;height:160px!important}
+
+/* SECTION */
+.sec-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:8px;padding-left:2px}
+
+/* OUTLET TABLE */
+.outlet-table{background:var(--bg2);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.outlet-row{display:flex;align-items:center;padding:11px 13px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .1s}
+.outlet-row:last-child{border-bottom:none}
+.outlet-row:active{background:var(--bg3)}
+.outlet-info{flex:1;min-width:0}
+.outlet-name{font-size:13px;font-weight:600}
+.outlet-meta{font-size:11px;color:var(--tx2);font-family:var(--mono);margin-top:2px;display:flex;align-items:center;gap:6px}
+.status-pip{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.pip-open{background:var(--gn)}
+.pip-closed{background:var(--rd)}
+.pip-idle{background:var(--tx3)}
+.outlet-nums{text-align:right;flex-shrink:0}
+.outlet-omset{font-size:14px;font-weight:700;font-family:var(--mono);color:var(--am)}
+.outlet-trx{font-size:10px;color:var(--tx2);font-family:var(--mono);margin-top:2px}
+.outlet-bar-wrap{height:3px;background:var(--b);border-radius:2px;margin:0 13px 10px;overflow:hidden}
+.outlet-bar{height:100%;border-radius:2px;background:var(--am);transition:width .5s}
+
+/* DETAIL PANEL */
+.detail-panel{background:var(--bg3);border-top:1px solid var(--b);padding:12px 13px;display:none}
+.detail-panel.show{display:block}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.detail-box{background:var(--bg2);border-radius:8px;padding:9px 10px}
+.detail-label{font-size:9px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.detail-val{font-size:13px;font-weight:700;font-family:var(--mono)}
+.metode-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid var(--b);font-family:var(--mono)}
+.metode-row:last-child{border-bottom:none}
+
+/* RANKING */
+.rank-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--b)}
+.rank-row:last-child{border-bottom:none}
+.rank-num{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--tx3);width:20px;flex-shrink:0}
+.rank-num.g1{color:#FFD700}.rank-num.g2{color:#C0C0C0}.rank-num.g3{color:#CD7F32}
+.rank-name{flex:1;font-size:13px;font-weight:500}
+.rank-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--am)}
+
+/* SOP MONITOR */
+.sop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.sop-box{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:10px 8px;text-align:center}
+.sop-box.ok{border-color:rgba(16,185,129,.4);background:var(--gnd)}
+.sop-box.miss{border-color:rgba(239,68,68,.3)}
+.sop-outlet{font-size:10px;font-weight:600;font-family:var(--mono);color:var(--tx2);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sop-icon{font-size:18px;margin-bottom:3px}
+.sop-status{font-size:9px;font-family:var(--mono);color:var(--tx3)}
 
 /* LOGIN */
-.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:24px;gap:16px}
-.login-card{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:28px 24px;width:100%;max-width:340px}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:24px}
+.login-card{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:28px 24px;width:100%;max-width:320px}
 .login-logo{text-align:center;margin-bottom:24px}
 .login-logo h1{font-size:22px;font-weight:800;color:var(--am)}
 .login-logo p{font-size:12px;color:var(--tx2);font-family:var(--mono);margin-top:4px}
-.form-label{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);display:block;margin-bottom:6px}
-.form-input{width:100%;background:var(--bg3);border:1.5px solid var(--b2);border-radius:8px;color:var(--tx);font-family:var(--font);font-size:14px;padding:11px 13px;outline:none;transition:border-color .2s;margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);display:block;margin-bottom:6px}
+.form-input{width:100%;background:var(--bg3);border:1.5px solid var(--b2);border-radius:8px;color:var(--tx);font-family:var(--mono);font-size:18px;padding:12px;outline:none;transition:border-color .2s;margin-bottom:12px;text-align:center;letter-spacing:6px}
 .form-input:focus{border-color:var(--am)}
 .btn-login{width:100%;background:var(--am);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:700;padding:13px;cursor:pointer;font-family:var(--font)}
-.btn-login:active{background:var(--am2)}
-.err{color:var(--rd);font-size:12px;font-family:var(--mono);margin-bottom:10px;text-align:center}
+.err-msg{color:var(--rd);font-size:12px;font-family:var(--mono);margin-bottom:10px;text-align:center}
 
-/* CONTENT */
-.content{padding:14px;max-width:480px;margin:0 auto;padding-bottom:24px}
-
-/* SUMMARY STRIP */
-.summary-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
-.sum-card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:12px}
-.sum-label{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);margin-bottom:4px}
-.sum-val{font-size:18px;font-weight:700;font-family:var(--mono);line-height:1.2}
-.sum-sub{font-size:10px;color:var(--tx2);margin-top:3px}
-
-/* SECTION */
-.section-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:8px;padding-left:2px}
-
-/* OUTLET CARDS */
-.outlet-card{background:var(--bg2);border:1px solid var(--b);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
-.outlet-card.open{border-color:rgba(16,185,129,.3)}
-.outlet-card.closed{border-color:rgba(239,68,68,.2)}
-.outlet-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.outlet-name{font-size:15px;font-weight:700}
-.outlet-id{font-size:10px;color:var(--tx3);font-family:var(--mono);margin-top:2px}
-.outlet-status{display:flex;align-items:center;gap:6px}
-.status-dot{width:7px;height:7px;border-radius:50%}
-.status-dot.open{background:var(--gn)}
-.status-dot.closed{background:var(--rd)}
-.status-dot.idle{background:var(--tx3)}
-.status-text{font-size:11px;font-family:var(--mono);color:var(--tx2)}
-.outlet-omset{font-size:18px;font-weight:700;color:var(--am);font-family:var(--mono);text-align:right}
-.outlet-trx{font-size:11px;color:var(--tx2);font-family:var(--mono);text-align:right}
-
-.outlet-body{padding:0 14px 14px;border-top:1px solid var(--b);display:none}
-.outlet-body.show{display:block;padding-top:12px}
-.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.metric{background:var(--bg3);border-radius:8px;padding:10px 12px}
-.metric-label{font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-.metric-val{font-size:15px;font-weight:700;font-family:var(--mono)}
-.metode-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid var(--b);font-family:var(--mono)}
-.metode-row:last-child{border-bottom:none}
-.metode-row .l{color:var(--tx2)}
-
-/* SOP STATUS */
-.sop-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid var(--b)}
-.sop-row:last-child{border-bottom:none}
-.sop-badge{font-size:10px;font-weight:600;font-family:var(--mono);padding:2px 7px;border-radius:10px}
-.sop-badge.done{background:var(--gnd);color:var(--gn)}
-.sop-badge.missing{background:var(--rdd);color:var(--rd)}
-.sop-badge.idle{background:var(--bg3);color:var(--tx3)}
-
-/* LOADING */
-.loading{text-align:center;padding:48px 20px}
-.loading-icon{font-size:32px;margin-bottom:12px;animation:spin 1.5s linear infinite}
+/* LOADING / EMPTY */
+.loading{text-align:center;padding:40px 20px}
+.loading-spin{font-size:28px;animation:spin 1s linear infinite;display:block;margin-bottom:10px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:12px;color:var(--tx2);font-family:var(--mono)}
-
-/* EMPTY */
-.empty{text-align:center;padding:32px;color:var(--tx3);font-size:12px;font-family:var(--mono)}
-
-/* LAST UPDATE */
-.last-update{text-align:center;font-size:11px;color:var(--tx3);font-family:var(--mono);padding:8px 0 4px}
-
-/* PENGELUARAN LIST */
-.keluar-item{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid var(--b)}
-.keluar-item:last-child{border-bottom:none}
-.keluar-item .l{color:var(--tx2);font-size:11px}
-.keluar-item .v{font-family:var(--mono);color:var(--rd);font-weight:600}
+.loading-txt{font-size:12px;color:var(--tx2);font-family:var(--mono)}
+.empty{text-align:center;padding:24px;color:var(--tx3);font-size:12px;font-family:var(--mono)}
+.last-upd{text-align:center;font-size:10px;color:var(--tx3);font-family:var(--mono);padding:6px 0 2px}
 </style>
 </head>
 <body>
-
-<div id="app"></div>
-
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 var SUPA_URL = 'https://xaixkcaeufxesqmdzhuv.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhaXhrY2FldWZ4ZXNxbWR6aHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5Njc1NzUsImV4cCI6MjA5NDU0MzU3NX0.nrFYxWfn8kA1JV6wyiW1X6KVRxKJi6yBnMPAGVIPTjY';
-var OWNER_PIN = '1111'; // PIN owner untuk akses dashboard
+var OWNER_PIN = '1111';
 
 var OUTLETS = [
-  {id:'OTL-A', nama:'Kedai Mencong'},
-  {id:'OTL-B', nama:'Kedai Tanser'},
-  {id:'OTL-C', nama:'Kedai Swadaya'},
-  {id:'OTL-D', nama:'Kedai Inpres'},
-  {id:'OTL-E', nama:'Kedai Kacang'},
-  {id:'OTL-F', nama:'Tekel 1'}
+  {id:'OTL-A',nama:'Kedai Mencong'},
+  {id:'OTL-B',nama:'Kedai Tanser'},
+  {id:'OTL-C',nama:'Kedai Swadaya'},
+  {id:'OTL-D',nama:'Kedai Inpres'},
+  {id:'OTL-E',nama:'Kedai Kacang'},
+  {id:'OTL-F',nama:'Tekel 1'}
 ];
 
-var expanded = {};
-var lastData = null;
-var autoRefreshInterval = null;
+var PERIODS = [
+  {id:'today',     label:'Hari Ini'},
+  {id:'yesterday', label:'Kemarin'},
+  {id:'week',      label:'Minggu Ini'},
+  {id:'lastweek',  label:'Minggu Lalu'},
+  {id:'month',     label:'Bulan Ini'},
+  {id:'lastmonth', label:'Bulan Lalu'},
+  {id:'year',      label:'Tahun Ini'}
+];
 
-// ── AUTH ──────────────────────────────────────────────────────
-var authed = localStorage.getItem('dashboard_auth') === '1';
+var authed     = localStorage.getItem('dash_auth') === '1';
+var period     = 'today';
+var expanded   = {};
+var chartInst  = null;
+var refreshInt = null;
 
-function render() {
-  if (!authed) { renderLogin(); return; }
-  renderShell();
-  loadData();
+// ── DATE HELPERS ──────────────────────────────────────────────
+function toISO(d){ return d.toISOString().slice(0,10); }
+function addDays(d,n){ var r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function startOfWeek(d){ var r=new Date(d); r.setDate(r.getDate()-r.getDay()+1); return r; }
+function startOfMonth(d){ return new Date(d.getFullYear(),d.getMonth(),1); }
+function startOfYear(d){ return new Date(d.getFullYear(),0,1); }
+
+function getPeriodRange(p) {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var ranges = {
+    today:     { from: toISO(today), to: toISO(today) },
+    yesterday: { from: toISO(addDays(today,-1)), to: toISO(addDays(today,-1)) },
+    week:      { from: toISO(startOfWeek(today)), to: toISO(today) },
+    lastweek:  { from: toISO(startOfWeek(addDays(today,-7))), to: toISO(addDays(startOfWeek(today),-1)) },
+    month:     { from: toISO(startOfMonth(today)), to: toISO(today) },
+    lastmonth: { from: toISO(startOfMonth(addDays(today,-today.getDate()))), to: toISO(addDays(startOfMonth(today),-1)) },
+    year:      { from: toISO(startOfYear(today)), to: toISO(today) }
+  };
+  return ranges[p] || ranges.today;
+}
+
+function getPrevRange(p) {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var prev = {
+    today:     { from: toISO(addDays(today,-1)), to: toISO(addDays(today,-1)) },
+    yesterday: { from: toISO(addDays(today,-2)), to: toISO(addDays(today,-2)) },
+    week:      { from: toISO(startOfWeek(addDays(today,-7))), to: toISO(addDays(startOfWeek(today),-1)) },
+    lastweek:  { from: toISO(startOfWeek(addDays(today,-14))), to: toISO(addDays(startOfWeek(addDays(today,-7)),-1)) },
+    month:     { from: toISO(startOfMonth(addDays(today,-today.getDate()))), to: toISO(addDays(startOfMonth(today),-1)) },
+    lastmonth: { from: toISO(startOfMonth(addDays(startOfMonth(addDays(today,-today.getDate())),-1))), to: toISO(addDays(startOfMonth(addDays(today,-today.getDate())),-1)) },
+    year:      { from: toISO(new Date(today.getFullYear()-1,0,1)), to: toISO(new Date(today.getFullYear()-1,11,31)) }
+  };
+  return prev[p] || prev.today;
+}
+
+// ── SUPABASE FETCH ────────────────────────────────────────────
+function supaGet(table, filter) {
+  return fetch(SUPA_URL + '/rest/v1/' + table + '?' + filter, {
+    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
+  }).then(function(r){ return r.json(); });
+}
+
+// ── FORMAT ────────────────────────────────────────────────────
+function fmt(n){ return 'Rp ' + Math.round(n||0).toLocaleString('id-ID'); }
+function fmtS(n){
+  n = Math.round(n||0);
+  if(n>=1000000) return 'Rp '+(n/1000000).toFixed(1)+'jt';
+  if(n>=1000)    return 'Rp '+(n/1000).toFixed(0)+'rb';
+  return 'Rp '+n;
+}
+function deltaHtml(curr, prev) {
+  if (!prev || prev === 0) return '';
+  var pct = Math.round((curr-prev)/prev*100);
+  var cls = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+  var sign = pct > 0 ? '▲' : pct < 0 ? '▼' : '=';
+  return '<span class="delta '+cls+'">'+sign+' '+Math.abs(pct)+'%</span>';
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────
 function renderLogin() {
-  document.getElementById('app').innerHTML =
-    '<div class="login-wrap">' +
-    '<div class="login-card">' +
-    '<div class="login-logo"><h1>☕ Teras Nyai</h1><p>Owner Dashboard</p></div>' +
+  document.getElementById('root').innerHTML =
+    '<div class="login-wrap"><div class="login-card">' +
+    '<div class="login-logo"><div style="font-size:40px;margin-bottom:8px">☕</div><h1>Teras Nyai</h1><p>Owner Dashboard</p></div>' +
     '<label class="form-label">PIN Owner</label>' +
-    '<input class="form-input" type="password" id="pin-input" placeholder="Masukkan PIN" inputmode="numeric" maxlength="4">' +
-    '<div class="err" id="pin-err" style="display:none">PIN salah</div>' +
-    '<button class="btn-login" onclick="doLogin()">Masuk</button>' +
+    '<input class="form-input" type="password" id="pin" placeholder="••••" inputmode="numeric" maxlength="4">' +
+    '<div class="err-msg" id="perr" style="display:none">PIN salah</div>' +
+    '<button class="btn-login" onclick="doLogin()">Masuk →</button>' +
     '</div></div>';
-  document.getElementById('pin-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') doLogin();
-  });
-  setTimeout(function(){ document.getElementById('pin-input').focus(); }, 100);
+  document.getElementById('pin').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+  setTimeout(function(){ var p=document.getElementById('pin'); if(p) p.focus(); },100);
 }
 
 function doLogin() {
-  var pin = document.getElementById('pin-input').value;
+  var pin = document.getElementById('pin').value;
   if (pin === OWNER_PIN) {
-    localStorage.setItem('dashboard_auth', '1');
+    localStorage.setItem('dash_auth','1');
     authed = true;
-    render();
+    renderShell();
+    loadData();
   } else {
-    document.getElementById('pin-err').style.display = 'block';
-    document.getElementById('pin-input').value = '';
+    document.getElementById('perr').style.display='block';
+    document.getElementById('pin').value='';
   }
 }
 
 // ── SHELL ─────────────────────────────────────────────────────
 function renderShell() {
-  var today = new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
-  document.getElementById('app').innerHTML =
+  var periodTabs = PERIODS.map(function(p){
+    return '<button class="period-tab'+(p.id===period?' active':'')+'" onclick="setPeriod(\''+p.id+'\')">'+p.label+'</button>';
+  }).join('');
+
+  document.getElementById('root').innerHTML =
     '<div class="topbar">' +
-    '<div><div class="brand">Teras <span>Nyai</span></div><div style="font-size:10px;color:var(--tx3);font-family:var(--mono)">' + today + '</div></div>' +
-    '<div class="topbar-right">' +
+    '<div><div class="brand">Teras <span>Nyai</span></div></div>' +
+    '<div style="display:flex;gap:8px;align-items:center">' +
     '<span class="live-dot"></span>' +
-    '<button class="refresh-btn" onclick="loadData()">↻ Refresh</button>' +
-    '<button class="refresh-btn" onclick="doLogout()" style="color:var(--rd)">Keluar</button>' +
+    '<button class="btn-sm" onclick="loadData()">↻</button>' +
+    '<button class="btn-sm btn-danger" onclick="doLogout()">Keluar</button>' +
     '</div></div>' +
-    '<div class="content" id="content"><div class="loading"><div class="loading-icon">⏳</div><div class="loading-text">Memuat data hari ini...</div></div></div>';
+    '<div class="period-wrap" id="period-tabs">'+periodTabs+'</div>' +
+    '<div class="content" id="content"><div class="loading"><span class="loading-spin">⏳</span><div class="loading-txt">Memuat data...</div></div></div>';
+}
+
+function setPeriod(p) {
+  period = p;
+  document.querySelectorAll('.period-tab').forEach(function(t){
+    t.classList.toggle('active', t.textContent === PERIODS.find(function(x){ return x.id===p; }).label);
+  });
+  loadData();
 }
 
 function doLogout() {
-  localStorage.removeItem('dashboard_auth');
+  localStorage.removeItem('dash_auth');
   authed = false;
-  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-  render();
+  if(refreshInt) clearInterval(refreshInt);
+  renderLogin();
 }
 
-// ── DATA FETCH ────────────────────────────────────────────────
-function supaGet(table, filter) {
-  var url = SUPA_URL + '/rest/v1/' + table + '?' + filter;
-  return fetch(url, {
-    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
-  }).then(function(r) { return r.json(); });
-}
-
-function fmt(n) { return 'Rp ' + Math.round(n||0).toLocaleString('id-ID'); }
-function fmtShort(n) {
-  n = Math.round(n||0);
-  if (n >= 1000000) return 'Rp ' + (n/1000000).toFixed(1) + 'jt';
-  if (n >= 1000) return 'Rp ' + (n/1000).toFixed(0) + 'rb';
-  return 'Rp ' + n;
-}
-
+// ── LOAD DATA ─────────────────────────────────────────────────
 function loadData() {
-  var tgl = new Date().toISOString().slice(0,10);
+  if(!document.getElementById('content')) return;
+  var r   = getPeriodRange(period);
+  var pr  = getPrevRange(period);
+  var today = new Date().toISOString().slice(0,10);
+  var yesterday = toISO(addDays(new Date(),- 1));
+
   document.getElementById('content').innerHTML =
-    '<div class="loading"><div class="loading-icon">⏳</div><div class="loading-text">Memuat data...</div></div>';
+    '<div class="loading"><span class="loading-spin">⏳</span><div class="loading-txt">Memuat data...</div></div>';
 
   Promise.all([
-    supaGet('transaksi', 'tgl=eq.' + tgl + '&status=eq.LUNAS&select=outlet_id,total,hpp_total,gross_profit,metode_bayar'),
-    supaGet('pengeluaran', 'tgl=eq.' + tgl + '&select=outlet_id,nominal,nama_akun'),
-    supaGet('sop_opening', 'tgl=eq.' + tgl + '&select=outlet_id,nama_crew,submitted_at'),
-    supaGet('sop_closing', 'tgl=eq.' + tgl + '&select=outlet_id,nama_crew,submitted_at'),
-    supaGet('absensi', 'tgl=eq.' + tgl + '&tipe=eq.MASUK&select=outlet_id,emp_nama,jam')
-  ]).then(function(results) {
-    var trxAll    = results[0] || [];
-    var kelAll    = results[1] || [];
-    var openAll   = results[2] || [];
-    var closeAll  = results[3] || [];
-    var absenAll  = results[4] || [];
-    renderDashboard(tgl, trxAll, kelAll, openAll, closeAll, absenAll);
-  }).catch(function(e) {
-    document.getElementById('content').innerHTML =
-      '<div class="empty">⚠️ Gagal memuat data<br>' + e.message + '</div>';
+    // Current period
+    supaGet('transaksi', 'tgl=gte.'+r.from+'&tgl=lte.'+r.to+'&status=eq.LUNAS&select=outlet_id,total,hpp_total,gross_profit,metode_bayar,tgl'),
+    supaGet('pengeluaran', 'tgl=gte.'+r.from+'&tgl=lte.'+r.to+'&select=outlet_id,nominal,nama_akun,tgl'),
+    // Previous period for delta
+    supaGet('transaksi', 'tgl=gte.'+pr.from+'&tgl=lte.'+pr.to+'&status=eq.LUNAS&select=outlet_id,total,gross_profit,tgl'),
+    // Today's SOP & absensi (always today)
+    supaGet('sop_opening', 'tgl=eq.'+today+'&select=outlet_id,nama_crew,submitted_at'),
+    supaGet('sop_closing', 'tgl=eq.'+today+'&select=outlet_id,nama_crew,submitted_at'),
+    // Chart data: today hourly vs yesterday hourly
+    supaGet('transaksi', 'tgl=eq.'+today+'&status=eq.LUNAS&select=total,jam'),
+    supaGet('transaksi', 'tgl=eq.'+yesterday+'&status=eq.LUNAS&select=total,jam')
+  ]).then(function(res){
+    renderDashboard(res[0]||[], res[1]||[], res[2]||[], res[3]||[], res[4]||[], res[5]||[], res[6]||[]);
+  }).catch(function(e){
+    document.getElementById('content').innerHTML='<div class="empty">⚠️ Gagal: '+e.message+'</div>';
   });
 }
 
-// ── RENDER DASHBOARD ──────────────────────────────────────────
-function renderDashboard(tgl, trxAll, kelAll, openAll, closeAll, absenAll) {
-  // Hitung total semua outlet
-  var totalOmset = trxAll.reduce(function(s,t){ return s+t.total; }, 0);
-  var totalTrx   = trxAll.length;
-  var totalKeluar= kelAll.reduce(function(s,k){ return s+k.nominal; }, 0);
-  var totalGross = trxAll.reduce(function(s,t){ return s+t.gross_profit; }, 0);
-  var outletBuka = openAll.filter(function(o,i,a){
-    return a.findIndex(function(x){ return x.outlet_id===o.outlet_id; }) === i;
-  }).length;
+// ── RENDER ────────────────────────────────────────────────────
+function renderDashboard(trx, kel, prevTrx, opens, closes, todayTrx, yesterdayTrx) {
+  var totalOmset = trx.reduce(function(s,t){return s+t.total;},0);
+  var totalGross = trx.reduce(function(s,t){return s+t.gross_profit;},0);
+  var totalHPP   = trx.reduce(function(s,t){return s+t.hpp_total;},0);
+  var totalKel   = kel.reduce(function(s,k){return s+k.nominal;},0);
+  var totalTrx   = trx.length;
+  var netProfit  = totalGross - totalKel;
 
-  var now = new Date().toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+  var prevOmset  = prevTrx.reduce(function(s,t){return s+t.total;},0);
+  var prevGross  = prevTrx.reduce(function(s,t){return s+t.gross_profit;},0);
+
+  var periodLabel = PERIODS.find(function(p){return p.id===period;}).label;
 
   var html = '';
 
-  // ── SUMMARY STRIP ──
-  html += '<div class="summary-strip">';
-  html += sumCard('Total Omset', fmtShort(totalOmset), totalTrx + ' trx', 'var(--am)');
-  html += sumCard('Gross Profit', fmtShort(totalGross), Math.round(totalGross/Math.max(totalOmset,1)*100) + '% margin', 'var(--gn)');
-  html += sumCard('Pengeluaran', fmtShort(totalKeluar), 'Net: ' + fmtShort(totalGross-totalKeluar), 'var(--rd)');
+  // ── SUMMARY CARDS ──
+  html += '<div class="sum-grid">';
+  html += sumCard('Total Omset', fmtS(totalOmset), totalTrx+' transaksi', 'var(--am)', deltaHtml(totalOmset, prevOmset));
+  html += sumCard('Gross Profit', fmtS(totalGross), Math.round(totalGross/Math.max(totalOmset,1)*100)+'% margin', 'var(--gn)', deltaHtml(totalGross, prevGross));
+  html += sumCard('Pengeluaran', fmtS(totalKel), kel.length+' item', 'var(--rd)', '');
+  html += sumCard('Net Profit', fmtS(netProfit), netProfit>=0?'Untung':'Rugi', netProfit>=0?'var(--gn)':'var(--rd)', '');
   html += '</div>';
 
-  // ── STATUS BARIS ──
-  html += '<div style="background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">';
-  html += '<div style="font-size:12px;color:var(--tx2)">Outlet aktif hari ini</div>';
-  html += '<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gn)">' + outletBuka + ' / ' + OUTLETS.length + '</div>';
+  // ── GRAFIK HARI INI vs KEMARIN ──
+  html += '<div class="chart-card">';
+  html += '<div class="chart-title">Penjualan per Jam';
+  html += '<div class="chart-legend">';
+  html += '<div class="legend-item"><div class="legend-dot" style="background:var(--am)"></div>Hari ini</div>';
+  html += '<div class="legend-item"><div class="legend-dot" style="background:var(--b2)"></div>Kemarin</div>';
+  html += '</div></div>';
+  html += '<div class="chart-wrap"><canvas id="trxChart"></canvas></div>';
   html += '</div>';
 
-  // ── OUTLET CARDS ──
-  html += '<div class="section-title">Semua Outlet</div>';
+  // ── RANKING OUTLET ──
+  var outletData = OUTLETS.map(function(o){
+    var oTrx = trx.filter(function(t){return t.outlet_id===o.id;});
+    return {
+      id: o.id, nama: o.nama,
+      omset: oTrx.reduce(function(s,t){return s+t.total;},0),
+      trxCount: oTrx.length,
+      gross: oTrx.reduce(function(s,t){return s+t.gross_profit;},0),
+      hpp: oTrx.reduce(function(s,t){return s+t.hpp_total;},0),
+      keluar: kel.filter(function(k){return k.outlet_id===o.id;}).reduce(function(s,k){return s+k.nominal;},0),
+      tunai: oTrx.filter(function(t){return t.metode_bayar==='TUNAI';}).reduce(function(s,t){return s+t.total;},0),
+      qris:  oTrx.filter(function(t){return t.metode_bayar==='QRIS';}).reduce(function(s,t){return s+t.total;},0),
+      transfer: oTrx.filter(function(t){return t.metode_bayar==='TRANSFER';}).reduce(function(s,t){return s+t.total;},0),
+      isOpen: opens.some(function(o2){return o2.outlet_id===o.id;}),
+      isClosed: closes.some(function(c){return c.outlet_id===o.id;}),
+      openInfo: opens.filter(function(o2){return o2.outlet_id===o.id;}),
+      closeInfo: closes.filter(function(c){return c.outlet_id===o.id;})
+    };
+  }).sort(function(a,b){return b.omset-a.omset;});
 
-  OUTLETS.forEach(function(outlet) {
-    var trx     = trxAll.filter(function(t){ return t.outlet_id === outlet.id; });
-    var kel     = kelAll.filter(function(k){ return k.outlet_id === outlet.id; });
-    var opens   = openAll.filter(function(o){ return o.outlet_id === outlet.id; });
-    var closes  = closeAll.filter(function(c){ return c.outlet_id === outlet.id; });
-    var absen   = absenAll.filter(function(a){ return a.outlet_id === outlet.id; });
+  var maxOmset = outletData[0] ? outletData[0].omset : 1;
 
-    var omset   = trx.reduce(function(s,t){ return s+t.total; }, 0);
-    var gross   = trx.reduce(function(s,t){ return s+t.gross_profit; }, 0);
-    var hpp     = trx.reduce(function(s,t){ return s+t.hpp_total; }, 0);
-    var keluar  = kel.reduce(function(s,k){ return s+k.nominal; }, 0);
-
-    var isOpen    = opens.length > 0;
-    var isClosed  = closes.length > 0;
-    var statusCls = isClosed ? 'closed' : isOpen ? 'open' : 'idle';
-    var statusTxt = isClosed ? 'Sudah Tutup' : isOpen ? 'Buka' : 'Belum Buka';
-    var isExpanded= expanded[outlet.id] || false;
-
-    // Metode bayar
-    var tunai    = trx.filter(function(t){ return t.metode_bayar==='TUNAI'; }).reduce(function(s,t){ return s+t.total; }, 0);
-    var qris     = trx.filter(function(t){ return t.metode_bayar==='QRIS'; }).reduce(function(s,t){ return s+t.total; }, 0);
-    var transfer = trx.filter(function(t){ return t.metode_bayar==='TRANSFER'; }).reduce(function(s,t){ return s+t.total; }, 0);
-
-    html += '<div class="outlet-card ' + statusCls + '" id="card-' + outlet.id + '">';
-
-    // Header
-    html += '<div class="outlet-head" onclick="toggleExpand(\'' + outlet.id + '\')">';
-    html += '<div>';
-    html += '<div class="outlet-name">' + outlet.nama + '</div>';
-    html += '<div style="display:flex;align-items:center;gap:6px;margin-top:3px">';
-    html += '<span class="status-dot ' + statusCls + '"></span>';
-    html += '<span class="status-text">' + statusTxt + '</span>';
-    if (absen.length > 0) {
-      html += '<span style="font-size:10px;color:var(--tx3);font-family:var(--mono)">· ' + absen.length + ' crew</span>';
-    }
-    html += '</div></div>';
-    html += '<div style="text-align:right">';
-    html += '<div class="outlet-omset">' + fmtShort(omset) + '</div>';
-    html += '<div class="outlet-trx">' + trx.length + ' trx · ' + (isExpanded ? '▲' : '▼') + '</div>';
+  // Ranking strip
+  html += '<div class="sec-title">Ranking Outlet — '+periodLabel+'</div>';
+  html += '<div class="rank-card">';
+  outletData.forEach(function(o, i) {
+    html += '<div class="rank-row">';
+    html += '<div class="rank-num'+(i<3?' g'+(i+1):'')+'">'+( i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)) +'</div>';
+    html += '<div class="rank-name">'+o.nama+'</div>';
+    html += '<div class="rank-val">'+fmtS(o.omset)+'</div>';
     html += '</div>';
-    html += '</div>';
-
-    // Body (expandable)
-    html += '<div class="outlet-body' + (isExpanded ? ' show' : '') + '" id="body-' + outlet.id + '">';
-
-    // Metrics
-    html += '<div class="metric-grid">';
-    html += metric('Gross Profit', fmtShort(gross), gross >= 0 ? 'var(--gn)' : 'var(--rd)');
-    html += metric('HPP', fmtShort(hpp), 'var(--tx2)');
-    html += metric('Pengeluaran', fmtShort(keluar), 'var(--rd)');
-    html += metric('Net', fmtShort(gross - keluar), (gross-keluar) >= 0 ? 'var(--gn)' : 'var(--rd)');
-    html += '</div>';
-
-    // Metode bayar
-    html += '<div style="margin-bottom:10px">';
-    html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Metode Bayar</div>';
-    html += metodeRow('Tunai', tunai);
-    html += metodeRow('QRIS', qris);
-    html += metodeRow('Transfer', transfer);
-    html += '</div>';
-
-    // SOP Status
-    html += '<div>';
-    html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Status SOP</div>';
-    html += sopRow('Opening', opens.length > 0, opens.length > 0 ? opens[0].nama_crew + ' ' + new Date(opens[0].submitted_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-');
-    html += sopRow('Closing', closes.length > 0, closes.length > 0 ? closes[0].nama_crew + ' ' + new Date(closes[0].submitted_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) : '-');
-    html += '</div>';
-
-    // Crew hadir
-    if (absen.length > 0) {
-      html += '<div style="margin-top:10px">';
-      html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Crew Hadir</div>';
-      absen.forEach(function(a) {
-        html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--b)">';
-        html += '<span>' + a.emp_nama + '</span>';
-        html += '<span style="font-family:var(--mono);color:var(--tx2)">' + (a.jam||'').slice(0,5) + '</span>';
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    // Pengeluaran
-    if (kel.length > 0) {
-      html += '<div style="margin-top:10px">';
-      html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Pengeluaran</div>';
-      kel.forEach(function(k) {
-        html += '<div class="keluar-item"><span class="l">' + (k.nama_akun||'-') + '</span><span class="v">' + fmt(k.nominal) + '</span></div>';
-      });
-      html += '</div>';
-    }
-
-    html += '</div>'; // end body
-    html += '</div>'; // end card
   });
+  html += '</div>';
 
-  html += '<div class="last-update">Terakhir diperbarui: ' + now + ' · Tap outlet untuk detail</div>';
+  // ── OUTLET DETAIL ──
+  html += '<div class="sec-title">Detail Per Outlet</div>';
+  html += '<div class="outlet-table">';
+  outletData.forEach(function(o) {
+    var statusCls = o.isClosed?'pip-closed':o.isOpen?'pip-open':'pip-idle';
+    var statusTxt = o.isClosed?'Sudah Tutup':o.isOpen?'Buka':'Belum Buka';
+    var pct = maxOmset > 0 ? Math.round(o.omset/maxOmset*100) : 0;
+    var isExp = expanded[o.id];
+
+    html += '<div>';
+    html += '<div class="outlet-row" onclick="toggleEx(\''+o.id+'\')">';
+    html += '<div class="outlet-info">';
+    html += '<div class="outlet-name">'+o.nama+'</div>';
+    html += '<div class="outlet-meta">';
+    html += '<span class="status-pip '+statusCls+'"></span>';
+    html += '<span>'+statusTxt+'</span>';
+    html += '<span>· '+o.trxCount+' trx</span>';
+    html += '</div></div>';
+    html += '<div class="outlet-nums">';
+    html += '<div class="outlet-omset">'+fmtS(o.omset)+'</div>';
+    html += '<div class="outlet-trx">Gross: '+fmtS(o.gross)+'</div>';
+    html += '</div></div>';
+    // Progress bar
+    html += '<div class="outlet-bar-wrap"><div class="outlet-bar" style="width:'+pct+'%"></div></div>';
+
+    // Expandable detail
+    html += '<div class="detail-panel'+(isExp?' show':'')+'" id="dp-'+o.id+'">';
+    html += '<div class="detail-grid">';
+    html += detBox('HPP', fmtS(o.hpp), 'var(--tx2)');
+    html += detBox('Pengeluaran', fmtS(o.keluar), 'var(--rd)');
+    html += detBox('Net', fmtS(o.gross-o.keluar), (o.gross-o.keluar)>=0?'var(--gn)':'var(--rd)');
+    html += '</div>';
+    html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Metode Bayar</div>';
+    html += mRow('Tunai', o.tunai);
+    html += mRow('QRIS', o.qris);
+    html += mRow('Transfer', o.transfer);
+    // SOP status
+    html += '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 4px">Status SOP</div>';
+    var op = o.openInfo[0];
+    var cl = o.closeInfo[0];
+    html += mRow('Opening', op ? (op.nama_crew+' '+new Date(op.submitted_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})) : '✗ Belum', null, op?'var(--gn)':'var(--rd)');
+    html += mRow('Closing', cl ? (cl.nama_crew+' '+new Date(cl.submitted_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})) : '✗ Belum', null, cl?'var(--gn)':'var(--rd)');
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  // ── SOP MONITOR GRID ──
+  html += '<div class="sec-title">Monitor SOP Hari Ini</div>';
+  html += '<div class="sop-grid">';
+  OUTLETS.forEach(function(o) {
+    var hasOpen  = opens.some(function(x){return x.outlet_id===o.id;});
+    var hasClose = closes.some(function(x){return x.outlet_id===o.id;});
+    var ok = hasOpen;
+    html += '<div class="sop-box'+(ok?' ok':'')+'">';
+    html += '<div class="sop-outlet">'+o.nama.replace('Kedai ','')+'</div>';
+    html += '<div class="sop-icon">'+(hasClose?'🔒':hasOpen?'🟢':'⚫')+'</div>';
+    html += '<div class="sop-status">'+(hasClose?'Tutup':hasOpen?'Buka':'Belum')+'</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="last-upd">Update: '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · Auto-refresh 60 detik</div>';
 
   document.getElementById('content').innerHTML = html;
 
-  // Auto refresh tiap 60 detik
-  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-  autoRefreshInterval = setInterval(loadData, 60000);
+  // ── RENDER CHART ──
+  renderChart(todayTrx, yesterdayTrx);
+
+  // Auto-refresh
+  if(refreshInt) clearInterval(refreshInt);
+  refreshInt = setInterval(loadData, 60000);
+}
+
+// ── CHART ─────────────────────────────────────────────────────
+function renderChart(todayTrx, yesterdayTrx) {
+  var hours = [];
+  for(var h=6; h<=23; h++) hours.push(h);
+
+  function aggByHour(trxList) {
+    var agg = {};
+    hours.forEach(function(h){ agg[h] = 0; });
+    trxList.forEach(function(t) {
+      var h = parseInt((t.jam||'00:00').slice(0,2));
+      if(agg[h] !== undefined) agg[h] += t.total;
+    });
+    return hours.map(function(h){ return agg[h]; });
+  }
+
+  var todayData     = aggByHour(todayTrx);
+  var yesterdayData = aggByHour(yesterdayTrx);
+  var labels        = hours.map(function(h){ return h+'.00'; });
+
+  var ctx = document.getElementById('trxChart');
+  if(!ctx) return;
+
+  if(chartInst) { chartInst.destroy(); chartInst = null; }
+
+  chartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Hari Ini',
+          data: todayData,
+          backgroundColor: 'rgba(245,158,11,0.7)',
+          borderColor: '#f59e0b',
+          borderWidth: 1,
+          borderRadius: 3
+        },
+        {
+          label: 'Kemarin',
+          data: yesterdayData,
+          backgroundColor: 'rgba(60,60,60,0.6)',
+          borderColor: '#444',
+          borderWidth: 1,
+          borderRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return ctx.dataset.label + ': Rp ' + Math.round(ctx.raw||0).toLocaleString('id-ID');
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color:'#555', font:{size:9}, maxRotation:0 },
+          grid: { color:'rgba(255,255,255,0.03)' }
+        },
+        y: {
+          ticks: {
+            color:'#555', font:{size:9},
+            callback: function(v) {
+              if(v>=1000000) return (v/1000000).toFixed(1)+'jt';
+              if(v>=1000) return (v/1000).toFixed(0)+'rb';
+              return v;
+            }
+          },
+          grid: { color:'rgba(255,255,255,0.05)' }
+        }
+      }
+    }
+  });
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
-function sumCard(label, val, sub, color) {
+function sumCard(label, val, sub, color, delta) {
   return '<div class="sum-card">' +
-    '<div class="sum-label">' + label + '</div>' +
-    '<div class="sum-val" style="color:' + color + '">' + val + '</div>' +
-    '<div class="sum-sub">' + sub + '</div>' +
+    '<div class="sum-label">'+label+'</div>' +
+    '<div class="sum-val" style="color:'+color+'">'+val+'</div>' +
+    '<div class="sum-sub">'+sub+(delta?' '+delta:'')+'</div>' +
     '</div>';
 }
 
-function metric(label, val, color) {
-  return '<div class="metric">' +
-    '<div class="metric-label">' + label + '</div>' +
-    '<div class="metric-val" style="color:' + color + '">' + val + '</div>' +
+function detBox(label, val, color) {
+  return '<div class="detail-box">' +
+    '<div class="detail-label">'+label+'</div>' +
+    '<div class="detail-val" style="color:'+color+'">'+val+'</div>' +
     '</div>';
 }
 
-function metodeRow(label, val) {
-  return '<div class="metode-row"><span class="l">' + label + '</span><span style="font-family:var(--mono);font-weight:' + (val>0?'600':'400') + ';color:' + (val>0?'var(--tx)':'var(--tx3)') + '">' + fmt(val) + '</span></div>';
+function mRow(label, val, num, color) {
+  var disp = num !== undefined ? fmt(num) : val;
+  var clr  = color || (num > 0 ? 'var(--tx)' : 'var(--tx3)');
+  return '<div class="metode-row">' +
+    '<span style="color:var(--tx2)">'+label+'</span>' +
+    '<span style="color:'+clr+'">'+disp+'</span>' +
+    '</div>';
 }
 
-function sopRow(label, done, info) {
-  return '<div class="sop-row">' +
-    '<span style="color:var(--tx2)">' + label + '</span>' +
-    '<div style="display:flex;align-items:center;gap:8px">' +
-    '<span style="font-size:11px;color:var(--tx3);font-family:var(--mono)">' + info + '</span>' +
-    '<span class="sop-badge ' + (done?'done':'missing') + '">' + (done?'✓ Ada':'✗ Belum') + '</span>' +
-    '</div></div>';
-}
-
-function toggleExpand(outletId) {
-  expanded[outletId] = !expanded[outletId];
-  var body = document.getElementById('body-' + outletId);
-  var card = document.getElementById('card-' + outletId);
-  if (body) body.classList.toggle('show', expanded[outletId]);
+function toggleEx(id) {
+  expanded[id] = !expanded[id];
+  var dp = document.getElementById('dp-'+id);
+  if(dp) dp.classList.toggle('show', expanded[id]);
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-render();
+if (!authed) renderLogin();
+else { renderShell(); loadData(); }
 </script>
 </body>
 </html>
