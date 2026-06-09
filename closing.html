@@ -767,6 +767,31 @@ function doSubmit(tgl, ts, urlAbsen, urlKedai, urlCatatan, urlAdonan, urlEsteler
 }
 
 
+// Upload satu file foto ke Supabase Storage, kembalikan URL publik
+function uploadFoto(file, folder) {
+  if (!file) return Promise.resolve('');
+  var ts = Date.now();
+  var safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  var path = folder + '/' + ts + '_' + safe;
+  return fetch(SUPA_URL + '/storage/v1/object/pos-photos/' + path, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': file.type || 'image/jpeg',
+      'x-upsert': 'true'
+    },
+    body: file
+  }).then(function(r) {
+    if (r.ok) return SUPA_URL + '/storage/v1/object/public/pos-photos/' + path;
+    console.error('Upload gagal', path, r.status);
+    return '[gagal]';
+  }).catch(function(e) {
+    console.error('Upload error', e);
+    return '[error]';
+  });
+}
+
 // Upload foto di background setelah data tersimpan
 function uploadFotoBackground(tgl, closingId) {
   var uploads = [
