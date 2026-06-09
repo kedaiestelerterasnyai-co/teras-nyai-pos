@@ -913,12 +913,146 @@ function LaporanManager({ toast }) {
 }
 
 // ── APP ───────────────────────────────────────────────────────
+// ── SYNC MANAGER ─────────────────────────────────────────────
+function SyncManager({ toast }) {
+  const [appsScriptUrl, setUrl] = React.useState(
+    localStorage.getItem('apps_script_url') || ''
+  );
+  const [syncing, setSyncing] = React.useState({});
+  const [results, setResults] = React.useState({});
+  const [tglDari, setTglDari] = React.useState(new Date().toISOString().slice(0,10));
+  const [tglSampai, setTglSampai] = React.useState(new Date().toISOString().slice(0,10));
+
+  const saveUrl = () => {
+    localStorage.setItem('apps_script_url', appsScriptUrl);
+    toast('URL Apps Script tersimpan ✓', 'ok');
+  };
+
+  const doSync = (type) => {
+    if (!appsScriptUrl) { toast('Masukkan URL Apps Script dulu', 'err'); return; }
+    setSyncing(s => ({ ...s, [type]: true }));
+    setResults(r => ({ ...r, [type]: null }));
+
+    const url = appsScriptUrl + '?action=syncToSheets&type=' + type +
+      '&tglDari=' + tglDari + '&tglSampai=' + tglSampai;
+
+    fetch(url)
+      .then(r => r.json())
+      .then(j => {
+        setSyncing(s => ({ ...s, [type]: false }));
+        if (j.status === 'ok') {
+          setResults(r => ({ ...r, [type]: { ok: true, msg: j.data.message || 'Berhasil' } }));
+          toast(type + ' berhasil disync ✓', 'ok');
+        } else {
+          setResults(r => ({ ...r, [type]: { ok: false, msg: j.message } }));
+          toast('Gagal sync ' + type, 'err');
+        }
+      })
+      .catch(e => {
+        setSyncing(s => ({ ...s, [type]: false }));
+        setResults(r => ({ ...r, [type]: { ok: false, msg: e.message } }));
+        toast('Error: ' + e.message, 'err');
+      });
+  };
+
+  const syncAll = () => {
+    ['transaksi','pengeluaran','absensi','sop_opening','sop_closing','report_sales','report_stock'].forEach(t => {
+      setTimeout(() => doSync(t), 500);
+    });
+  };
+
+  const SYNC_ITEMS = [
+    { id:'transaksi',     label:'Transaksi Penjualan', desc:'TRX_HEADER + TRX_DETAIL', icon:'🧾' },
+    { id:'pengeluaran',   label:'Pengeluaran',          desc:'Sheet PENGELUARAN',        icon:'💸' },
+    { id:'absensi',       label:'Absensi Karyawan',     desc:'Sheet ABSENSI',            icon:'👤' },
+    { id:'sop_opening',   label:'SOP Opening',          desc:'Sheet SOP_OPENING',        icon:'🌅' },
+    { id:'sop_closing',   label:'SOP Closing',          desc:'Sheet SOP_CLOSING',        icon:'🌙' },
+    { id:'report_sales',  label:'Report Sales',         desc:'Sheet REPORT_SALES',       icon:'💰' },
+    { id:'report_stock',  label:'Report Stock',         desc:'Sheet REPORT_STOCK',       icon:'📦' },
+  ];
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-head"><span className="card-title">Konfigurasi</span></div>
+        <div className="card-body">
+          <div className="form-group">
+            <label className="form-label">URL Apps Script (Web App)</label>
+            <div style={{display:'flex',gap:10}}>
+              <input className="form-input" style={{fontFamily:'var(--mono)',fontSize:12}}
+                placeholder="https://script.google.com/macros/s/.../exec"
+                value={appsScriptUrl} onChange={e => setUrl(e.target.value)} />
+              <button className="btn btn-amber btn-sm" style={{flex:'0 0 auto'}} onClick={saveUrl}>Simpan</button>
+            </div>
+          </div>
+          <div className="form-row" style={{marginTop:8}}>
+            <div className="form-group" style={{marginBottom:0}}>
+              <label className="form-label">Dari Tanggal</label>
+              <input className="form-input" type="date" value={tglDari} onChange={e => setTglDari(e.target.value)} />
+            </div>
+            <div className="form-group" style={{marginBottom:0}}>
+              <label className="form-label">Sampai Tanggal</label>
+              <input className="form-input" type="date" value={tglSampai} onChange={e => setTglSampai(e.target.value)} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Sync ke Google Sheets</span>
+          <button className="btn btn-amber btn-sm" onClick={syncAll}>🔄 Sync Semua</button>
+        </div>
+        {SYNC_ITEMS.map(item => (
+          <div key={item.id} className="list-item">
+            <div className="list-item-left">
+              <div className="title">{item.icon} {item.label}</div>
+              <div className="sub">{item.desc}</div>
+              {results[item.id] && (
+                <div style={{
+                  fontSize:11, fontFamily:'var(--mono)', marginTop:4,
+                  color: results[item.id].ok ? 'var(--gn)' : 'var(--rd)'
+                }}>
+                  {results[item.id].ok ? '✓ ' : '✗ '}{results[item.id].msg}
+                </div>
+              )}
+            </div>
+            <button
+              className={'btn btn-sm ' + (syncing[item.id] ? 'btn-ghost' : 'btn-success')}
+              onClick={() => doSync(item.id)}
+              disabled={syncing[item.id]}
+              style={{flex:'0 0 auto'}}
+            >
+              {syncing[item.id] ? '⏳ Syncing...' : '↑ Sync'}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="card">
+        <div className="card-head"><span className="card-title">Cara Pakai</span></div>
+        <div className="card-body" style={{fontSize:13,lineHeight:1.8,color:'var(--tx2)'}}>
+          <p>1. Pastikan URL Apps Script sudah diisi dan tersimpan</p>
+          <p>2. Pilih rentang tanggal data yang ingin disync</p>
+          <p>3. Klik <strong style={{color:'var(--tx)'}}>↑ Sync</strong> per tabel atau <strong style={{color:'var(--tx)'}}>Sync Semua</strong></p>
+          <p>4. Data dari Supabase akan ditulis ke Google Sheets otomatis</p>
+          <p style={{marginTop:8,color:'var(--am)'}}>⚠️ Sync akan overwrite data yang sudah ada di Sheets untuk rentang tanggal yang sama</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const NAV = [
   { id:'dashboard',  label:'Dashboard',  icon:'📊' },
   { id:'menu',       label:'Master Menu', icon:'🍽️' },
   { id:'karyawan',   label:'Karyawan',   icon:'👥' },
   { id:'outlet',     label:'Outlet',     icon:'🏪' },
   { id:'laporan',    label:'Laporan',    icon:'📋' },
+  { id:'sync',       label:'Sync Sheets', icon:'🔄' },
+  { id:'bahan',      label:'Bahan Baku',  icon:'🧪' },
+  { id:'resep',      label:'Resep',       icon:'📖' },
+  { id:'stok',       label:'Stok',        icon:'📦' },
 ];
 
 function App() {
@@ -968,8 +1102,494 @@ function App() {
           {page === 'karyawan'  && <KaryawanManager toast={showToast} />}
           {page === 'outlet'    && <OutletManager toast={showToast} />}
           {page === 'laporan'   && <LaporanManager toast={showToast} />}
+          {page === 'sync'      && <SyncManager toast={showToast} />}
+      {page === 'bahan'     && <BahanPage toast={showToast} />}
+      {page === 'resep'     && <ResepPage toast={showToast} />}
+      {page === 'stok'      && <StokPage toast={showToast} />}
         </div>
       </div>
+    </div>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════
+//  BAHAN BAKU PAGE
+// ══════════════════════════════════════════════════════════════
+function BahanPage({ toast }) {
+  const [items, setItems]   = React.useState([]);
+  const [loading, setLoad]  = React.useState(true);
+  const [form, setForm]     = React.useState({ nama:'', satuan:'gr', kategori:'Bahan', harga_beli:0, stok_minimal:100 });
+  const [editId, setEditId] = React.useState(null);
+  const [search, setSearch] = React.useState('');
+
+  const SATUAN = ['gr','ml','pcs','butir','lbr','sachet','botol','lembar','porsi'];
+  const KATEGORI = ['Bahan','Kemasan'];
+
+  const load = () => {
+    setLoad(true);
+    supa.query('bahan_baku', { select:'*', filter:'aktif=eq.true', order:'kategori,nama' })
+      .then(d => { setItems(d||[]); setLoad(false); });
+  };
+  React.useEffect(() => { load(); }, []);
+
+  const save = async () => {
+    if (!form.nama.trim()) { toast('Nama bahan wajib diisi', 'err'); return; }
+    if (editId) {
+      const ok = await supa.update('bahan_baku', editId, form);
+      if (ok) { toast('Bahan diperbarui ✓', 'ok'); setEditId(null); setForm({ nama:'', satuan:'gr', kategori:'Bahan', harga_beli:0, stok_minimal:100 }); load(); }
+      else toast('Gagal update', 'err');
+    } else {
+      const id = 'BHN-' + Math.random().toString(36).substr(2,8).toUpperCase();
+      const ok = await supa.insert('bahan_baku', { ...form, id });
+      if (ok) { toast('Bahan ditambahkan ✓', 'ok'); setForm({ nama:'', satuan:'gr', kategori:'Bahan', harga_beli:0, stok_minimal:100 }); load(); }
+      else toast('Gagal simpan', 'err');
+    }
+  };
+
+  const edit = (item) => {
+    setEditId(item.id);
+    setForm({ nama:item.nama, satuan:item.satuan, kategori:item.kategori, harga_beli:item.harga_beli||0, stok_minimal:item.stok_minimal||100 });
+    window.scrollTo(0,0);
+  };
+
+  const hapus = async (id) => {
+    if (!confirm('Hapus bahan ini?')) return;
+    const ok = await supa.update('bahan_baku', id, { aktif: false });
+    if (ok) { toast('Dihapus', 'ok'); load(); }
+    else toast('Gagal hapus', 'err');
+  };
+
+  const filtered = items.filter(i => i.nama.toLowerCase().includes(search.toLowerCase()));
+  const byKat = KATEGORI.map(k => ({ kat:k, items: filtered.filter(i => i.kategori===k) })).filter(g => g.items.length > 0);
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div><div className="page-title">🧪 Bahan Baku</div><div className="page-sub">{items.length} bahan terdaftar</div></div>
+      </div>
+
+      {/* FORM */}
+      <div className="card" style={{marginBottom:16}}>
+        <div className="card-head">
+          <span className="card-title">{editId ? '✏️ Edit Bahan' : '+ Tambah Bahan'}</span>
+          {editId && <button className="btn btn-sm btn-ghost" onClick={() => { setEditId(null); setForm({ nama:'', satuan:'gr', kategori:'Bahan', harga_beli:0, stok_minimal:100 }); }}>✕ Batal</button>}
+        </div>
+        <div className="card-body">
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Nama Bahan *</label>
+              <input className="form-input" value={form.nama} onChange={e=>setForm({...form,nama:e.target.value})} placeholder="Misal: Jelly Hijau" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Satuan</label>
+              <select className="form-select" value={form.satuan} onChange={e=>setForm({...form,satuan:e.target.value})}>
+                {SATUAN.map(s=><option key={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Kategori</label>
+              <select className="form-select" value={form.kategori} onChange={e=>setForm({...form,kategori:e.target.value})}>
+                {KATEGORI.map(k=><option key={k}>{k}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Stok Minimal (alert)</label>
+              <input className="form-input" type="number" value={form.stok_minimal} onChange={e=>setForm({...form,stok_minimal:+e.target.value})} />
+            </div>
+          </div>
+          <button className="btn btn-primary btn-full" onClick={save}>{editId?'Simpan Perubahan':'+ Tambah Bahan'}</button>
+        </div>
+      </div>
+
+      {/* SEARCH */}
+      <input className="form-input" placeholder="🔍 Cari bahan..." value={search} onChange={e=>setSearch(e.target.value)} style={{marginBottom:12}} />
+
+      {/* LIST */}
+      {loading ? <div className="empty">⏳ Memuat...</div> : byKat.map(g => (
+        <div key={g.kat} style={{marginBottom:16}}>
+          <div className="section-title">{g.kat} ({g.items.length})</div>
+          <div className="card">
+            {g.items.map(item => (
+              <div key={item.id} className="list-item">
+                <div className="list-item-left">
+                  <div className="title">{item.nama}</div>
+                  <div className="sub">Satuan: {item.satuan} · Min stok: {item.stok_minimal}</div>
+                </div>
+                <div style={{display:'flex',gap:6,flexShrink:0}}>
+                  <button className="btn btn-sm btn-ghost" onClick={()=>edit(item)}>Edit</button>
+                  <button className="btn btn-sm btn-danger" onClick={()=>hapus(item.id)}>Hapus</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RESEP PAGE — Bill of Materials per Menu
+// ══════════════════════════════════════════════════════════════
+function ResepPage({ toast }) {
+  const [menus, setMenus]   = React.useState([]);
+  const [bahans, setBahans] = React.useState([]);
+  const [selMenu, setSelMenu] = React.useState(null);
+  const [resep, setResep]   = React.useState([]);
+  const [form, setForm]     = React.useState({ bahan_id:'', jumlah:'' });
+  const [search, setSearch] = React.useState('');
+  const [saving, setSaving] = React.useState(false);
+
+  React.useEffect(() => {
+    Promise.all([
+      supa.query('menu', { select:'id,nama,kategori', filter:'aktif=eq.true', order:'kategori,nama' }),
+      supa.query('bahan_baku', { select:'id,nama,satuan,kategori', filter:'aktif=eq.true', order:'kategori,nama' })
+    ]).then(([m,b]) => { setMenus(m||[]); setBahans(b||[]); });
+  }, []);
+
+  const loadResep = (menuId) => {
+    setSelMenu(menuId);
+    supa.query('resep', { select:'*,bahan_baku(nama,satuan)', filter:`menu_id=eq.${menuId}`, order:'bahan_baku(kategori),bahan_baku(nama)' })
+      .then(d => setResep(d||[]));
+  };
+
+  const addBahan = async () => {
+    if (!form.bahan_id || !form.jumlah) { toast('Pilih bahan dan isi jumlah', 'err'); return; }
+    setSaving(true);
+    const bahan = bahans.find(b=>b.id===form.bahan_id);
+    const ok = await supa.insert('resep', {
+      menu_id: selMenu, bahan_id: form.bahan_id,
+      jumlah: parseFloat(form.jumlah), satuan: bahan?.satuan
+    });
+    if (ok) { toast('Bahan ditambahkan ke resep ✓', 'ok'); setForm({bahan_id:'',jumlah:''}); loadResep(selMenu); }
+    else toast('Gagal — mungkin bahan sudah ada di resep ini', 'err');
+    setSaving(false);
+  };
+
+  const hapusBahan = async (id) => {
+    if (!confirm('Hapus bahan dari resep ini?')) return;
+    await fetch(`${SUPA_URL}/rest/v1/resep?id=eq.${id}`, {
+      method:'DELETE', headers:{ apikey:SUPA_KEY, Authorization:'Bearer '+SUPA_KEY }
+    });
+    toast('Dihapus dari resep', 'ok');
+    loadResep(selMenu);
+  };
+
+  const updateJumlah = async (id, val) => {
+    await supa.update('resep', id, { jumlah: parseFloat(val) });
+  };
+
+  const menuFiltered = menus.filter(m=>m.nama.toLowerCase().includes(search.toLowerCase()));
+  const selMenuData  = menus.find(m=>m.id===selMenu);
+  const bahanBelumDipakai = bahans.filter(b => !resep.find(r=>r.bahan_id===b.id));
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div><div className="page-title">📖 Resep / BOM</div>
+          <div className="page-sub">Bill of Materials per menu</div>
+        </div>
+      </div>
+
+      {!selMenu ? (
+        <>
+          <input className="form-input" placeholder="🔍 Cari menu..." value={search} onChange={e=>setSearch(e.target.value)} style={{marginBottom:12}} />
+          <div className="card">
+            {menuFiltered.length === 0 && <div className="empty">Tidak ada menu</div>}
+            {menuFiltered.map(m => (
+              <div key={m.id} className="list-item" style={{cursor:'pointer'}} onClick={()=>loadResep(m.id)}>
+                <div className="list-item-left">
+                  <div className="title">{m.nama}</div>
+                  <div className="sub">{m.kategori}</div>
+                </div>
+                <div style={{color:'var(--c-amber)',fontSize:13}}>Edit Resep →</div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <button className="btn btn-ghost btn-sm" onClick={()=>{setSelMenu(null);setResep([]);}} style={{marginBottom:12}}>
+            ← Kembali ke daftar menu
+          </button>
+
+          <div className="card" style={{marginBottom:12}}>
+            <div className="card-head">
+              <span className="card-title">🍽️ {selMenuData?.nama}</span>
+              <span className="badge badge-amber">{resep.length} bahan</span>
+            </div>
+            <div className="card-body" style={{padding:0}}>
+              {resep.length === 0 && <div className="empty" style={{padding:'16px 0'}}>Belum ada bahan — tambahkan di bawah</div>}
+              {resep.map(r => (
+                <div key={r.id} style={{display:'flex',alignItems:'center',padding:'10px 13px',borderBottom:'1px solid var(--c-border)',gap:10}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,fontWeight:500}}>{r.bahan_baku?.nama}</div>
+                    <div style={{fontSize:11,color:'var(--c-text2)',fontFamily:"'JetBrains Mono',monospace"}}>{r.satuan}</div>
+                  </div>
+                  <input type="number" defaultValue={r.jumlah}
+                    onBlur={e=>updateJumlah(r.id, e.target.value)}
+                    style={{width:72,background:'var(--c-bg3)',border:'1.5px solid var(--c-border2)',borderRadius:7,color:'var(--c-text)',fontFamily:"'JetBrains Mono',monospace",fontSize:14,padding:'6px 10px',textAlign:'center',outline:'none'}} />
+                  <button className="btn btn-sm btn-danger" onClick={()=>hapusBahan(r.id)}>✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tambah bahan ke resep */}
+          <div className="card">
+            <div className="card-head"><span className="card-title">+ Tambah Bahan ke Resep</span></div>
+            <div className="card-body">
+              <div className="form-group">
+                <label className="form-label">Pilih Bahan</label>
+                <select className="form-select" value={form.bahan_id} onChange={e=>setForm({...form,bahan_id:e.target.value})}>
+                  <option value="">-- Pilih Bahan --</option>
+                  {['Bahan','Kemasan'].map(kat => (
+                    <optgroup key={kat} label={kat}>
+                      {bahanBelumDipakai.filter(b=>b.kategori===kat).map(b=>(
+                        <option key={b.id} value={b.id}>{b.nama} ({b.satuan})</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Jumlah per 1 Porsi {form.bahan_id && `(${bahans.find(b=>b.id===form.bahan_id)?.satuan})`}</label>
+                <input className="form-input" type="number" value={form.jumlah} onChange={e=>setForm({...form,jumlah:e.target.value})} placeholder="Misal: 150" />
+              </div>
+              <button className="btn btn-primary btn-full" onClick={addBahan} disabled={saving}>
+                {saving ? '⏳ Menyimpan...' : '+ Tambah ke Resep'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STOK PAGE — Monitor & Barang Masuk
+// ══════════════════════════════════════════════════════════════
+function StokPage({ toast }) {
+  const [tab, setTab]       = React.useState('monitor'); // monitor | masuk | log
+  const [outlets, setOutlets] = React.useState([]);
+  const [bahans, setBahans] = React.useState([]);
+  const [stokData, setStok] = React.useState([]);
+  const [selOutlet, setSelOutlet] = React.useState('');
+  const [loading, setLoad]  = React.useState(false);
+  const [form, setForm]     = React.useState({ bahan_id:'', jumlah:'', satuan:'', supplier:'', catatan:'', tgl: new Date().toISOString().slice(0,10) });
+  const [log, setLog]       = React.useState([]);
+
+  React.useEffect(() => {
+    Promise.all([
+      supa.query('outlets', { select:'id,nama', filter:'aktif=eq.true' }),
+      supa.query('bahan_baku', { select:'*', filter:'aktif=eq.true', order:'kategori,nama' })
+    ]).then(([o,b]) => {
+      setOutlets(o||[]);
+      setBahans(b||[]);
+      if(o&&o.length>0) setSelOutlet(o[0].id);
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (!selOutlet) return;
+    loadStok();
+  }, [selOutlet]);
+
+  const loadStok = () => {
+    setLoad(true);
+    Promise.all([
+      supa.query('stok_outlet', { select:'*,bahan_baku(nama,satuan,kategori,stok_minimal)', filter:`outlet_id=eq.${selOutlet}` }),
+      supa.query('stok_masuk', { select:'*,bahan_baku(nama,satuan)', filter:`outlet_id=eq.${selOutlet}`, order:'created_at.desc' })
+    ]).then(([s,m]) => { setStok(s||[]); setLog(m||[]); setLoad(false); });
+  };
+
+  const simpanMasuk = async () => {
+    if (!form.bahan_id || !form.jumlah) { toast('Pilih bahan dan isi jumlah', 'err'); return; }
+    const bahan = bahans.find(b=>b.id===form.bahan_id);
+    const jumlah = parseFloat(form.jumlah);
+
+    // Simpan stok_masuk
+    const ok = await supa.insert('stok_masuk', {
+      outlet_id: selOutlet, bahan_id: form.bahan_id,
+      jumlah, satuan: bahan?.satuan,
+      supplier: form.supplier, catatan: form.catatan,
+      tgl: form.tgl, dicatat_oleh: 'Admin'
+    });
+
+    if (ok) {
+      // Update stok_outlet (upsert)
+      const existing = stokData.find(s=>s.bahan_id===form.bahan_id);
+      if (existing) {
+        await supa.update('stok_outlet', existing.id, {
+          stok_saat_ini: (existing.stok_saat_ini||0) + jumlah,
+          updated_at: new Date().toISOString()
+        });
+      } else {
+        await supa.insert('stok_outlet', {
+          outlet_id: selOutlet, bahan_id: form.bahan_id,
+          stok_saat_ini: jumlah, stok_kemarin: 0
+        });
+      }
+      // Log
+      await supa.insert('stok_log', {
+        outlet_id: selOutlet, bahan_id: form.bahan_id,
+        jumlah_pakai: jumlah, satuan: bahan?.satuan,
+        tipe: 'MASUK', tgl: form.tgl
+      });
+
+      toast('Stok masuk tersimpan ✓', 'ok');
+      setForm({ bahan_id:'', jumlah:'', satuan:'', supplier:'', catatan:'', tgl: new Date().toISOString().slice(0,10) });
+      loadStok();
+    } else toast('Gagal simpan', 'err');
+  };
+
+  const stokWithBahan = bahans.map(b => {
+    const s = stokData.find(x=>x.bahan_id===b.id);
+    return { ...b, stok: s?.stok_saat_ini||0, stokKemarin: s?.stok_kemarin||0 };
+  });
+
+  const byKat = ['Bahan','Kemasan'].map(k=>({
+    kat:k, items: stokWithBahan.filter(b=>b.kategori===k)
+  }));
+
+  const alertItems = stokWithBahan.filter(b=>b.stok < b.stok_minimal);
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div><div className="page-title">📦 Manajemen Stok</div></div>
+      </div>
+
+      {/* Pilih Outlet */}
+      <div className="form-group" style={{marginBottom:12}}>
+        <label className="form-label">Outlet</label>
+        <select className="form-select" value={selOutlet} onChange={e=>setSelOutlet(e.target.value)}>
+          {outlets.map(o=><option key={o.id} value={o.id}>{o.nama}</option>)}
+        </select>
+      </div>
+
+      {/* Tab */}
+      <div style={{display:'flex',gap:6,marginBottom:14}}>
+        {[['monitor','📊 Monitor Stok'],['masuk','📥 Barang Masuk'],['log','📋 Riwayat']].map(([id,l])=>(
+          <button key={id} onClick={()=>setTab(id)}
+            style={{padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',border:'1.5px solid var(--c-border2)',fontFamily:"'JetBrains Mono',monospace",
+              background:tab===id?'rgba(245,158,11,.12)':'none',
+              borderColor:tab===id?'var(--c-amber)':'var(--c-border2)',
+              color:tab===id?'var(--c-amber)':'var(--c-text2)'}}>
+            {l}
+          </button>
+        ))}
+      </div>
+
+      {/* MONITOR STOK */}
+      {tab === 'monitor' && (
+        <>
+          {alertItems.length > 0 && (
+            <div style={{background:'rgba(239,68,68,.1)',border:'1px solid rgba(239,68,68,.3)',borderRadius:10,padding:'10px 13px',marginBottom:12}}>
+              <div style={{fontSize:12,fontWeight:700,color:'var(--c-red)',marginBottom:6}}>⚠️ {alertItems.length} bahan hampir habis!</div>
+              {alertItems.map(b=>(
+                <div key={b.id} style={{fontSize:12,color:'var(--c-red)',fontFamily:"'JetBrains Mono',monospace"}}>
+                  • {b.nama}: {b.stok} {b.satuan} (min: {b.stok_minimal})
+                </div>
+              ))}
+            </div>
+          )}
+
+          {loading ? <div className="empty">⏳ Memuat...</div> : byKat.map(g=>(
+            <div key={g.kat} style={{marginBottom:14}}>
+              <div className="section-title">{g.kat}</div>
+              <div className="card">
+                {/* Header */}
+                <div style={{display:'grid',gridTemplateColumns:'1fr 80px 80px 60px',padding:'7px 13px',fontSize:10,fontWeight:700,color:'var(--c-text3)',textTransform:'uppercase',letterSpacing:'.06em',fontFamily:"'JetBrains Mono',monospace",borderBottom:'1px solid var(--c-border)'}}>
+                  <span>Bahan</span><span style={{textAlign:'right'}}>Kemarin</span><span style={{textAlign:'right'}}>Sisa</span><span style={{textAlign:'right'}}>Sat.</span>
+                </div>
+                {g.items.map(b=>{
+                  const low = b.stok < b.stok_minimal;
+                  const pct = b.stok_minimal > 0 ? Math.min(b.stok/b.stok_minimal,1)*100 : 100;
+                  return (
+                    <div key={b.id} style={{padding:'9px 13px',borderBottom:'1px solid var(--c-border)',background:low?'rgba(239,68,68,.04)':'transparent'}}>
+                      <div style={{display:'grid',gridTemplateColumns:'1fr 80px 80px 60px',alignItems:'center'}}>
+                        <span style={{fontSize:13,fontWeight:low?600:400,color:low?'var(--c-red)':'var(--c-text)'}}>{b.nama}</span>
+                        <span style={{textAlign:'right',fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:'var(--c-text2)'}}>{b.stokKemarin}</span>
+                        <span style={{textAlign:'right',fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:600,color:low?'var(--c-red)':'var(--c-green)'}}>{b.stok}</span>
+                        <span style={{textAlign:'right',fontSize:10,color:'var(--c-text3)',fontFamily:"'JetBrains Mono',monospace"}}>{b.satuan}</span>
+                      </div>
+                      {/* Mini progress bar */}
+                      <div style={{height:2,background:'var(--c-border)',borderRadius:1,marginTop:4,overflow:'hidden'}}>
+                        <div style={{height:'100%',width:pct+'%',background:low?'var(--c-red)':'var(--c-green)',borderRadius:1,transition:'width .5s'}}></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {/* BARANG MASUK */}
+      {tab === 'masuk' && (
+        <div className="card">
+          <div className="card-head"><span className="card-title">📥 Input Barang Masuk</span></div>
+          <div className="card-body">
+            <div className="form-group">
+              <label className="form-label">Tanggal</label>
+              <input className="form-input" type="date" value={form.tgl} onChange={e=>setForm({...form,tgl:e.target.value})} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Bahan / Item</label>
+              <select className="form-select" value={form.bahan_id} onChange={e=>setForm({...form,bahan_id:e.target.value})}>
+                <option value="">-- Pilih Bahan --</option>
+                {['Bahan','Kemasan'].map(kat=>(
+                  <optgroup key={kat} label={kat}>
+                    {bahans.filter(b=>b.kategori===kat).map(b=>(
+                      <option key={b.id} value={b.id}>{b.nama} ({b.satuan})</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Jumlah {form.bahan_id && `(${bahans.find(b=>b.id===form.bahan_id)?.satuan})`}</label>
+                <input className="form-input" type="number" value={form.jumlah} onChange={e=>setForm({...form,jumlah:e.target.value})} placeholder="0" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Supplier</label>
+                <input className="form-input" value={form.supplier} onChange={e=>setForm({...form,supplier:e.target.value})} placeholder="Nama supplier" />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Catatan</label>
+              <input className="form-input" value={form.catatan} onChange={e=>setForm({...form,catatan:e.target.value})} placeholder="Keterangan tambahan..." />
+            </div>
+            <button className="btn btn-primary btn-full" onClick={simpanMasuk}>📥 Simpan Barang Masuk</button>
+          </div>
+        </div>
+      )}
+
+      {/* RIWAYAT */}
+      {tab === 'log' && (
+        <div className="card">
+          <div className="card-head"><span className="card-title">📋 Riwayat Barang Masuk</span></div>
+          {log.length === 0 && <div className="empty">Belum ada riwayat</div>}
+          {log.slice(0,50).map(l=>(
+            <div key={l.id} className="list-item">
+              <div className="list-item-left">
+                <div className="title">{l.bahan_baku?.nama}</div>
+                <div className="sub">{l.tgl} · {l.supplier||'-'}</div>
+              </div>
+              <div style={{textAlign:'right',fontFamily:"'JetBrains Mono',monospace",fontSize:14,fontWeight:600,color:'var(--c-green)'}}>
+                +{l.jumlah} <span style={{fontSize:10,color:'var(--c-text2)'}}>{l.bahan_baku?.satuan}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
