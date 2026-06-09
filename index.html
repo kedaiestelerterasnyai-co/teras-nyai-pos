@@ -279,6 +279,22 @@ const supa = {
   }
 };
 
+// ── UPLOAD FOTO KE SUPABASE STORAGE (untuk opening) ───────────
+async function uploadFotoStorage(file, folder) {
+  if (!file) return '';
+  const ts = Date.now();
+  const path = folder + '/' + ts + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  try {
+    const r = await fetch(`${SUPA_URL}/storage/v1/object/pos-photos/${path}`, {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}`, 'Content-Type': file.type || 'image/jpeg', 'x-upsert': 'true' },
+      body: file
+    });
+    if (r.ok) return `${SUPA_URL}/storage/v1/object/public/pos-photos/${path}`;
+  } catch (e) { console.error('upload foto gagal', e); }
+  return '';
+}
+
 // ── UTILS ─────────────────────────────────────────────────────
 const fmt    = n  => 'Rp ' + Math.round(n || 0).toLocaleString('id-ID');
 const toISO  = () => new Date().toISOString().slice(0, 10);
@@ -1133,6 +1149,7 @@ function OpeningPage({ session, onDone, toast }) {
     if (!fotoAbsen) { toast('Foto absen wajib diupload', 'err'); return; }
     setSaving(true);
     const now = new Date();
+    const subAt = now.toISOString();
     const payload = {
       outlet_id    : session.outletId,
       emp_id       : session.user.id,
@@ -1149,11 +1166,11 @@ function OpeningPage({ session, onDone, toast }) {
       cek_opening  : JSON.stringify(cekOpening),
       kebersihan_area: JSON.stringify(kebersihan),
       kata_hari_ini: kataHari,
-      foto_absen_url: fotoAbsen ? fotoAbsen.name : '',
-      foto_kedai_url: fotoKedai ? fotoKedai.name : '',
-      submitted_at : now.toISOString()
+      foto_absen_url: '',   // diisi belakangan via background upload
+      foto_kedai_url: '',
+      submitted_at : subAt
     };
-    // Simpan ke sop_opening
+    // Simpan ke sop_opening (cepat, tanpa tunggu foto)
     await supa.insert('sop_opening', payload).catch(()=>{});
     // Simpan ke absensi
     await supa.insert('absensi', {
@@ -1161,6 +1178,21 @@ function OpeningPage({ session, onDone, toast }) {
       outlet_id: session.outletId, emp_id: session.user.id, emp_nama: session.user.nama,
       tgl: toISO(), jam: toTime(), tipe: 'MASUK', shift: getShift(), ket: kataHari
     }).catch(()=>{});
+
+    // Upload foto di BACKGROUND lalu tambal URL-nya (tidak menahan submit)
+    const fAbsen = fotoAbsen, fKedai = fotoKedai, oid = session.outletId, tgl = toISO();
+    (async () => {
+      const urlAbsen = await uploadFotoStorage(fAbsen, 'sop-opening/' + tgl);
+      const urlKedai = await uploadFotoStorage(fKedai, 'sop-opening/' + tgl);
+      const patch = {};
+      if (urlAbsen) patch.foto_absen_url = urlAbsen;
+      if (urlKedai) patch.foto_kedai_url = urlKedai;
+      if (Object.keys(patch).length) {
+        await supa.update('sop_opening',
+          `outlet_id=eq.${oid}&tgl=eq.${tgl}&emp_id=eq.${session.user.id}`, patch).catch(()=>{});
+      }
+    })();
+
     setSaving(false);
     onDone();
   };
