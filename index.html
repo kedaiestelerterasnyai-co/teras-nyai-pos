@@ -298,6 +298,17 @@ async function uploadFotoStorage(file, folder) {
 // ── UTILS ─────────────────────────────────────────────────────
 const fmt    = n  => 'Rp ' + Math.round(n || 0).toLocaleString('id-ID');
 const toISO  = () => new Date().toISOString().slice(0, 10);
+
+// ── MODAL HARIAN (kotak terpisah, anti-tertimpa) ──────────────
+// Modal disimpan di key sendiri per tanggal. Hanya ditulis saat input
+// modal awal, hanya dibaca oleh Uang Keluar & Laporan. Tidak ada kode
+// lain yang menyentuhnya, sehingga tidak bisa ter-reset jadi 0.
+const ModalStore = {
+  key: () => 'pos_modal_' + new Date().toISOString().slice(0,10),
+  set: (v) => { try { localStorage.setItem(ModalStore.key(), String(parseInt(v)||0)); } catch(e){} },
+  get: () => { try { return parseInt(localStorage.getItem(ModalStore.key())) || 0; } catch(e){ return 0; } },
+  clear: () => { try { localStorage.removeItem(ModalStore.key()); } catch(e){} }
+};
 const toTime = () => { const d = new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:00`; };
 const toTimeShort = () => toTime().slice(0, 5);
 const getShift = () => { const h = new Date().getHours(); return h < 11 ? 'PAGI' : h < 17 ? 'SIANG' : 'MALAM'; };
@@ -779,9 +790,8 @@ function KeuPage({ session, toast }) {
   const [saving, setSaving] = useState(false);
   const kc = useRef(1);
 
-  // Ambil modal dari shift data (dibaca ulang setiap render)
-  const shiftData = JSON.parse(localStorage.getItem('pos_shift_data') || '{}');
-  const modalAwal = parseInt(shiftData.modal) || 0;
+  // Ambil modal dari kotak terpisah (anti-tertimpa, tidak akan jadi 0)
+  const modalAwal = ModalStore.get();
 
   useEffect(() => {
     supa.query('pengeluaran', { select:'*', filter:`tgl=eq.${toISO()}&outlet_id=eq.${session.outletId}`, order:'created_at.desc' }).then(d => setItems(d||[]));
@@ -1002,7 +1012,7 @@ function LapPage({ session, toast }) {
 
   const sd = JSON.parse(localStorage.getItem('pos_shift_data') || '{}');
   const shiftStart = sd.shiftStart || null;
-  const modalAwal  = sd.modal || 0;
+  const modalAwal  = ModalStore.get();   // dari kotak terpisah, konsisten dgn Uang Keluar
 
   useEffect(() => {
     // Flush offline queue dulu sebelum ambil data
@@ -1063,6 +1073,16 @@ function LapPage({ session, toast }) {
           <div className="stat-label">Net Shift</div>
           <div className="stat-value" style={{ color: net>=0?'var(--c-green)':'var(--c-red)' }}>{fmt(net)}</div>
           <div className="stat-sub">{net>=0?'Untung':'Rugi'}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Modal / Petty Cash</div>
+          <div className="stat-value" style={{ color:'var(--c-text)' }}>{fmt(modalAwal)}</div>
+          <div className="stat-sub">modal awal shift</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Sisa Petty Cash</div>
+          <div className="stat-value" style={{ color: (modalAwal-totalK)>=0?'var(--c-green)':'var(--c-red)' }}>{fmt(modalAwal-totalK)}</div>
+          <div className="stat-sub">modal − pengeluaran</div>
         </div>
       </div>
 
@@ -1617,6 +1637,7 @@ function ClosingRedirect({ session }) {
     if (localStorage.getItem('pos_shift_closed') === '1') {
       localStorage.removeItem('pos_shift_data');
       localStorage.removeItem('pos_shift_closed');
+      ModalStore.clear();
     }
   }, []);
 
@@ -1705,6 +1726,7 @@ function App() {
     localStorage.removeItem('pos_session');
     localStorage.removeItem('pos_stage');
     localStorage.removeItem('pos_shift_data');
+    ModalStore.clear();
   };
   const handleOpeningDone = () => { setStage('role'); localStorage.setItem('pos_stage', 'role'); };
   const handleRole = (role) => {
@@ -1718,6 +1740,7 @@ function App() {
   };
   const handleModalDone = (modal) => {
     const todayISO = toISO();
+    ModalStore.set(modal);   // simpan modal ke kotak terpisah (anti-tertimpa)
     const sd = {
       totalPenjualan:0, totalQris:0, totalTunai:0, totalPengeluaran:0,
       modal: modal, outletId: session.outletId, tgl: todayISO,
